@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACN Exam Intelligence — JNTUH M.Tech</title>
+<style>
+/* ── reset & base ── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f7f4;--surface:#fff;--surface2:#f4f3f0;
+  --border:#e5e4de;--border2:#d5d4ce;
+  --text:#1a1a18;--muted:#666;--dim:#aaa;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-border:#bfdbfe;
+  --green:#166534;--green-bg:#dcfce7;
+  --amber:#713f12;--amber-bg:#fef9c3;--amber-border:#fde047;
+  --red:#991b1b;--red-bg:#fee2e2;
+  --ev-hi:#166534;--ev-mid:#92400e;--ev-lo:#9f1239;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#111110;--surface:#1c1c1a;--surface2:#252523;
+    --border:#2e2e2b;--border2:#3a3a37;
+    --text:#f0ede8;--muted:#999;--dim:#555;
+    --blue:#60a5fa;--blue-bg:#1e2a3a;--blue-border:#2d4a6a;
+    --green:#4ade80;--green-bg:#14291e;
+    --amber:#fbbf24;--amber-bg:#2a2010;--amber-border:#4a3a10;
+    --red:#f87171;--red-bg:#2a1010;
+    --ev-hi:#4ade80;--ev-mid:#fbbf24;--ev-lo:#f87171;
+  }
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+a{color:var(--blue)}
+/* ── layout ── */
+.wrap{max-width:880px;margin:0 auto;padding:16px}
+/* ── header ── */
+.hdr{margin-bottom:16px}
+.hdr h1{font-size:20px;font-weight:700;margin-bottom:2px}
+.hdr p{font-size:12px;color:var(--muted)}
+/* ── kpi row ── */
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.kpi-n{font-size:26px;font-weight:700;color:var(--text)}
+.kpi-l{font-size:11px;color:var(--muted);margin-top:2px}
+/* ── tabs ── */
+.tabs{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{padding:7px 13px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-radius:6px 6px 0 0;border:1px solid transparent;border-bottom:none;background:transparent;transition:all .15s;margin-bottom:-1px;white-space:nowrap}
+.tab.active{color:var(--blue);border-color:var(--border);background:var(--surface)}
+.tab:hover:not(.active){background:var(--surface2);color:var(--text)}
+.panel{display:none}.panel.active{display:block}
+/* ── info / warn boxes ── */
+.ibox{background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--blue);margin-bottom:12px;line-height:1.6}
+.wbox{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--amber);margin-bottom:12px;line-height:1.6}
+.rbox{background:var(--red-bg);border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:12px;line-height:1.6}
+/* ── badges ── */
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap;display:inline-block}
+.bmust{background:var(--green-bg);color:var(--green)}
+.bskip{background:var(--amber-bg);color:var(--amber)}
+.bgood{background:var(--blue-bg);color:var(--blue)}
+/* ── heatmap ── */
+.ucard{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.uhdr{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none}
+.uhdr:hover{background:var(--surface2)}
+.ulbl{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.ubody{display:none;padding:0 14px 12px;border-top:1px solid var(--border)}
+.ubody.open{display:block}
+.trow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--surface2)}
+.trow:last-child{border-bottom:none}
+.tstars{color:#f59e0b;font-size:13px;letter-spacing:-1px;min-width:70px;flex-shrink:0}
+.tname{flex:1;font-size:13px;color:var(--text)}
+.fbar{height:5px;background:var(--surface2);border-radius:3px;width:80px;flex-shrink:0;border:1px solid var(--border)}
+.ffill{height:100%;border-radius:3px;background:var(--blue)}
+/* ── EV table ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;padding:8px;font-weight:600;color:var(--muted);font-size:11px;border-bottom:1px solid var(--border);background:var(--surface2);position:sticky;top:0}
+.tbl td{padding:8px;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl tr:hover td{background:var(--surface2)}
+.evH{color:var(--ev-hi);font-weight:700}
+.evM{color:var(--ev-mid);font-weight:600}
+.evL{color:var(--ev-lo)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+.tbl-wrap .tbl{border:none}
+/* ── answer cards ── */
+.acard{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden}
+.aq{padding:11px 14px;font-size:13px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.aq:hover{background:var(--surface2)}
+.aq-left{flex:1}
+.aq-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.arr{font-size:13px;color:var(--dim);transition:transform .2s;display:inline-block}
+.arr.open{transform:rotate(180deg)}
+.ab{display:none;padding:4px 14px 14px;font-size:13px;color:var(--muted);line-height:1.75;border-top:1px solid var(--border)}
+.ab.open{display:block}
+.ab h4{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 5px}
+.ab p{margin-bottom:8px;color:var(--muted)}
+.ab b{color:var(--text);font-weight:600}
+.ab .inline-tbl{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+.ab .inline-tbl th{text-align:left;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);font-weight:600;color:var(--text);font-size:11px}
+.ab .inline-tbl td{padding:6px 8px;border:1px solid var(--border);vertical-align:top}
+.ab .inline-tbl tr:nth-child(even) td{background:var(--surface2)}
+.ab .codebox{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:monospace;font-size:12px;margin:8px 0;line-height:1.6;white-space:pre-wrap;color:var(--text)}
+/* ── plan grid ── */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+.pc h3{font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.pslot{display:flex;gap:10px;margin-bottom:7px;align-items:flex-start}
+.ptime{font-size:11px;font-weight:700;color:var(--blue);min-width:28px;padding-top:1px;flex-shrink:0}
+.pcnt{font-size:12px;color:var(--muted);line-height:1.5}
+.pcnt b{color:var(--text)}
+/* ── tracker ── */
+.tksec{margin-bottom:16px}
+.tksec-head{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;padding:0 4px}
+.cki{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer}
+.cki:hover{background:var(--surface2)}
+.cki input{accent-color:var(--blue);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.cki label{font-size:13px;color:var(--text);cursor:pointer;line-height:1.4}
+.cki input:checked+label{color:var(--dim);text-decoration:line-through}
+.pw{background:var(--border);border-radius:4px;height:8px;margin:8px 0 4px}
+.pb{height:100%;border-radius:4px;background:var(--blue);transition:width .3s}
+.prog-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px}
+.prog-label{color:var(--muted);font-weight:600}
+.prog-val{color:var(--blue);font-weight:700}
+.reset-btn{margin-top:12px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:6px;cursor:pointer}
+.reset-btn:hover{background:var(--surface2);color:var(--text)}
+/* ── compare tables ── */
+.cmp-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.cmp-head{padding:10px 14px;font-weight:700;font-size:13px;background:var(--surface2);border-bottom:1px solid var(--border);color:var(--text)}
+.cmp-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.cmp-tbl th{text-align:left;padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);font-weight:600;font-size:12px;color:var(--text)}
+.cmp-tbl td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+.cmp-tbl tr:last-child td{border-bottom:none}
+.cmp-tbl td:first-child{font-weight:600;color:var(--text);width:28%;background:var(--surface2)}
+.cmp-tbl tr:nth-child(even) td:not(:first-child){background:var(--surface2)}
+/* ── predicted paper ── */
+.qpaper{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px}
+.qpaper-head{padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border);font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.qunit{padding:10px 14px;border-bottom:1px solid var(--border)}
+.qunit:last-child{border-bottom:none}
+.qunit-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:8px}
+.qitem{display:flex;gap:10px;align-items:flex-start;margin-bottom:6px}
+.qnum{font-size:12px;font-weight:700;color:var(--blue);min-width:20px}
+.qtxt{font-size:13px;color:var(--text);flex:1;line-height:1.5}
+.qmarks{font-size:11px;color:var(--muted);white-space:nowrap}
+.qprob{font-size:11px;padding:1px 6px;border-radius:10px;font-weight:600;white-space:nowrap}
+.qhi{background:var(--green-bg);color:var(--green)}
+.qmed{background:var(--amber-bg);color:var(--amber)}
+/* ── print ── */
+@media print{
+  body{background:#fff;color:#000;font-size:12px}
+  .tabs,.tab{display:none}
+  .panel{display:block!important}
+  .panel+.panel{page-break-before:always}
+  .acard,.ucard,.cmp-card,.qpaper{break-inside:avoid}
+  .ab{display:block!important}
+}
+/* ── responsive ── */
+@media(max-width:600px){
+  .krow{grid-template-columns:1fr 1fr}
+  .pgrid{grid-template-columns:1fr}
+  .trow{flex-wrap:wrap;gap:6px}
+  .fbar{display:none}
+  .tab{font-size:11px;padding:6px 10px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+  <h1>📡 ACN Exam Intelligence Package</h1>
+  <p>JNTUH M.Tech — Advanced Computer Networks &nbsp;·&nbsp; Senior Expert Strategy &nbsp;·&nbsp; 7 tabs · 17 answer templates · all content offline</p>
+</div>
+
+<div class="krow">
+  <div class="kpi"><div class="kpi-n">22</div><div class="kpi-l">Must-do topics</div></div>
+  <div class="kpi"><div class="kpi-n">70+</div><div class="kpi-l">Target marks</div></div>
+  <div class="kpi"><div class="kpi-n">18h</div><div class="kpi-l">Full prep plan</div></div>
+  <div class="kpi"><div class="kpi-n">9h</div><div class="kpi-l">Minimum viable</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="sw('hm')">🔥 Heat map</div>
+  <div class="tab" onclick="sw('ev')">📊 EV matrix</div>
+  <div class="tab" onclick="sw('ans')">📝 Answer templates</div>
+  <div class="tab" onclick="sw('pl')">⏱ 18-hr plan</div>
+  <div class="tab" onclick="sw('tk')">✅ Tracker</div>
+  <div class="tab" onclick="sw('cmp')">⚖ Compare tables</div>
+  <div class="tab" onclick="sw('pq')">🎯 Predicted paper</div>
+  <div class="tab" onclick="sw('ft')" style="background:#dc2626;color:#fff;border-color:#dc2626;font-weight:700">⚡ 4HR FASTTRACK</div>
+</div>
+
+<!-- ══ HEAT MAP ══ -->
+<div id="hm" class="panel active">
+  <div class="wbox">⚠ <b>Don't study equally.</b> Open each unit below. Anything marked "skip if short" is very low probability — skip unless you have spare time. 80% of marks come from 30% of topics.</div>
+  <div id="hgrid"></div>
+</div>
+
+<!-- ══ EV MATRIX ══ -->
+<div id="ev" class="panel">
+  <div class="ibox">💡 <b>Expected Value (EV) = Probability × Marks.</b> EV/hr = expected marks per hour invested. Always study topics in descending EV/hr order — not unit order, not alphabetical.</div>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr><th>Topic</th><th>Unit</th><th>Prob %</th><th>Marks</th><th>EV</th><th>Time (h)</th><th style="color:var(--ev-hi)">EV/hr ↓</th></tr></thead>
+      <tbody id="evt"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ ANSWER TEMPLATES ══ -->
+<div id="ans" class="panel">
+  <div class="ibox">📌 <b>10M answer formula:</b> Definition → Diagram (describe it) → Working / Steps → Advantages → Disadvantages → Applications → Conclusion. That structure earns 70–80% of marks even with average content. Click any question below.</div>
+  <div id="alist"></div>
+</div>
+
+<!-- ══ 18-HR PLAN ══ -->
+<div id="pl" class="panel">
+  <div class="ibox">⏱ <b>18 hours = complete preparation. 9 hours = minimum viable.</b> Short on time? Do Blocks 1–3 only (TCP, Network Layer, Routing) — that covers ~60% of expected marks.</div>
+  <div class="pgrid" id="pgrid"></div>
+</div>
+
+<!-- ══ TRACKER ══ -->
+<div id="tk" class="panel">
+  <div class="prog-row">
+    <span class="prog-label">Preparation progress</span>
+    <span id="pp" class="prog-val">0 / 22</span>
+  </div>
+  <div class="pw"><div class="pb" id="pb" style="width:0%"></div></div>
+  <div id="tklist"></div>
+  <button class="reset-btn" onclick="resetTracker()">Reset all checkboxes</button>
+</div>
+
+<!-- ══ COMPARE TABLES ══ -->
+<div id="cmp" class="panel">
+  <div class="ibox">📊 <b>Memorize these tables.</b> Examiners award marks for structured comparisons. Draw as a 3-column table in your answer with a header row. Each row = 0.5–1 mark.</div>
+  <div id="cmpcontent"></div>
+</div>
+
+<!-- ══ PREDICTED PAPER ══ -->
+<div id="pq" class="panel">
+  <div class="rbox">🎯 <b>Predicted Question Paper</b> — Based on 10-year frequency analysis + JNTUH pattern (2 questions per unit, answer any 1 per unit = 5 × 10M = 50M, plus short questions). Green = very high probability. Yellow = high probability.</div>
+  <div id="qpaper"></div>
+</div>
+
+<div id="ft" class="panel"></div>
+</div><!-- /wrap -->
+
+<script>
+/* ═══════════════ DATA ═══════════════ */
+
+const units = [
+  {l:'Unit I', c:'#e0e7ff', tc:'#3730a3', pri:'Medium priority · 2h', topics:[
+    {n:'OSI Model — 7 layers, names, functions',            s:5, f:9,  b:'must'},
+    {n:'TCP/IP Architecture — 4-layer model',               s:5, f:9,  b:'must'},
+    {n:'Packet vs Circuit Switching',                        s:4, f:7,  b:'must'},
+    {n:'Router Architecture — queuing, forwarding',          s:4, f:6,  b:'good'},
+    {n:'Network Edge vs Network Core',                       s:3, f:5,  b:'good'},
+    {n:'ATM, Frame Relay, legacy tech',                      s:1, f:1,  b:'skip'},
+  ]},
+  {l:'Unit II ⭐ Very High', c:'#fef3c7', tc:'#92400e', pri:'Very High priority · 4h', topics:[
+    {n:"Dijkstra's Algorithm (Link State Routing)",          s:5, f:10, b:'must'},
+    {n:'Distance Vector Routing — Bellman-Ford',             s:5, f:9,  b:'must'},
+    {n:'Ethernet — CSMA/CD, frame format, MAC',              s:5, f:9,  b:'must'},
+    {n:'CRC Error Detection — algorithm + example',          s:5, f:8,  b:'must'},
+    {n:'OSPF vs RIP vs BGP — comparison',                   s:5, f:8,  b:'must'},
+    {n:'Parity / Checksum (basic)',                          s:3, f:4,  b:'good'},
+    {n:'Token Ring, other legacy LAN',                       s:1, f:1,  b:'skip'},
+  ]},
+  {l:'Unit III 🔥 MOST IMPORTANT', c:'#fee2e2', tc:'#991b1b', pri:'Highest priority · 5h — study this unit first', topics:[
+    {n:'TCP Congestion Control — all 4 phases',              s:5, f:10, b:'must'},
+    {n:'TCP Three-way Handshake + 4-way FIN',               s:5, f:10, b:'must'},
+    {n:'TCP Flow Control — sliding window',                  s:5, f:9,  b:'must'},
+    {n:'TCP Header — all fields, bit widths',                s:5, f:9,  b:'must'},
+    {n:'TCP vs UDP — comparison + headers',                  s:5, f:9,  b:'must'},
+    {n:'IPv4 Header + Address Classes (A/B/C/D/E)',          s:5, f:9,  b:'must'},
+    {n:'IPv6 Header + Advantages + Transition',              s:5, f:8,  b:'must'},
+    {n:'DNS — hierarchy, recursive vs iterative',            s:5, f:8,  b:'must'},
+    {n:'HTTP — request/response, persistent connections',    s:5, f:8,  b:'must'},
+    {n:'Socket Programming basics',                          s:3, f:4,  b:'good'},
+    {n:'FTP protocol',                                       s:1, f:2,  b:'skip'},
+    {n:'SMTP / POP3 / IMAP',                                s:1, f:2,  b:'skip'},
+  ]},
+  {l:'Unit IV ⭐ High', c:'#dcfce7', tc:'#166534', pri:'High priority · 3h', topics:[
+    {n:'IEEE 802.11 — CSMA/CA, frame, architecture',        s:5, f:8,  b:'must'},
+    {n:'Mobile IP — HA, FA, Registration, triangle routing', s:5, f:8,  b:'must'},
+    {n:'WDM & Optical Networks — multiplexing, switches',   s:4, f:6,  b:'must'},
+    {n:'Wireless Mesh Networks',                             s:3, f:4,  b:'good'},
+  ]},
+  {l:'Unit V ⭐ High', c:'#f3e8ff', tc:'#6b21a8', pri:'High priority · 3h', topics:[
+    {n:'VPN — architecture, IPSec, types',                   s:5, f:9,  b:'must'},
+    {n:'MPLS — label switching, FEC, LSP',                   s:5, f:8,  b:'must'},
+    {n:'MANET — routing, AODV in detail',                    s:5, f:9,  b:'must'},
+    {n:'Wireless Sensor Networks — clustering, energy',      s:4, f:7,  b:'must'},
+    {n:'VoIP — architecture, protocols (H.323, SIP)',        s:4, f:6,  b:'good'},
+  ]},
+];
+
+const evd = [
+  {t:'TCP Congestion Control',   u:'III', p:95, m:10, h:0.75},
+  {t:'OSI Model',                u:'I',   p:90, m:10, h:0.50},
+  {t:'Dijkstra Algorithm',       u:'II',  p:90, m:10, h:0.75},
+  {t:'TCP Three-way Handshake',  u:'III', p:90, m:10, h:0.50},
+  {t:'VPN',                      u:'V',   p:88, m:10, h:0.50},
+  {t:'MANET / AODV',             u:'V',   p:88, m:10, h:0.75},
+  {t:'Ethernet & CSMA/CD',       u:'II',  p:85, m:10, h:0.75},
+  {t:'IPv4 vs IPv6',             u:'III', p:85, m:10, h:0.75},
+  {t:'DNS',                      u:'III', p:82, m:10, h:0.50},
+  {t:'HTTP',                     u:'III', p:82, m:10, h:0.50},
+  {t:'Distance Vector Routing',  u:'II',  p:80, m:10, h:0.75},
+  {t:'Mobile IP',                u:'IV',  p:80, m:10, h:0.50},
+  {t:'IEEE 802.11',              u:'IV',  p:78, m:10, h:0.50},
+  {t:'MPLS',                     u:'V',   p:78, m:10, h:0.50},
+  {t:'CRC Algorithm',            u:'II',  p:75, m:10, h:0.50},
+  {t:'WSN Clustering',           u:'V',   p:70, m:10, h:0.50},
+  {t:'WDM Optical Networks',     u:'IV',  p:68, m:10, h:0.50},
+  {t:'TCP vs UDP (short Q)',     u:'III', p:85, m:5,  h:0.25},
+  {t:'OSPF vs RIP (short Q)',    u:'II',  p:75, m:5,  h:0.25},
+  {t:'FTP',                      u:'III', p:12, m:10, h:0.50},
+  {t:'SMTP / POP3',              u:'III', p:10, m:10, h:0.50},
+].sort((a,b)=>((b.p/100*b.m)/b.h)-((a.p/100*a.m)/a.h));
+
+/* ─────────────────────────────────────────────
+   ANSWER TEMPLATES  (all 10 topics)
+───────────────────────────────────────────── */
+const answers = [
+
+{q:'TCP Congestion Control — 4 phases, AIMD, diagram (10M) · 95% papers',u:'III',body:`
+<h4>Definition</h4>
+<p>TCP Congestion Control prevents network overload by dynamically adjusting the sender's transmission rate based on congestion signals (packet loss / duplicate ACKs). Controlled by <b>cwnd</b> (congestion window) which limits unacknowledged bytes in flight.</p>
+<h4>4 Phases</h4>
+<p><b>1. Slow Start:</b> cwnd starts at 1 MSS. Doubles every RTT (exponential growth). Continues until cwnd ≥ ssthresh or loss is detected.</p>
+<p><b>2. Congestion Avoidance:</b> Once cwnd ≥ ssthresh, increase cwnd by 1 MSS per RTT (linear = additive increase). Continues until loss.</p>
+<p><b>3. Fast Retransmit:</b> On 3 duplicate ACKs → retransmit lost segment immediately without waiting for timeout. (3 dup ACKs = mild congestion signal.)</p>
+<p><b>4. Fast Recovery:</b> After fast retransmit: ssthresh = cwnd/2; cwnd = ssthresh + 3; enter Congestion Avoidance directly (skip Slow Start).</p>
+<h4>On Timeout vs. 3 Dup ACKs</h4>
+<table class="inline-tbl"><tr><th>Event</th><th>Action</th><th>Next state</th></tr>
+<tr><td>Timeout</td><td>ssthresh=cwnd/2 ; cwnd=1 MSS</td><td>Slow Start</td></tr>
+<tr><td>3 Dup ACKs</td><td>ssthresh=cwnd/2 ; cwnd=ssthresh+3</td><td>Fast Recovery → CA</td></tr></table>
+<h4>Diagram — draw the sawtooth</h4>
+<p>Y-axis = cwnd (MSS). X-axis = time (RTT). Draw: exponential rise (Slow Start) → hits ssthresh → linear rise (CA) → cwnd halves on loss → repeat sawtooth. Label the ssthresh line and each region.</p>
+<h4>AIMD Principle</h4>
+<p>Additive Increase (+1 MSS/RTT) / Multiplicative Decrease (÷2 on loss). This converges to fair bandwidth sharing among competing TCP flows.</p>
+<h4>Conclusion</h4>
+<p>Without congestion control, a few aggressive senders could collapse the internet. AIMD provides stable, fair, self-regulating bandwidth allocation.</p>`},
+
+{q:'TCP Three-way Handshake + 4-way FIN + TIME_WAIT (10M)',u:'III',body:`
+<h4>Purpose</h4>
+<p>Synchronizes Initial Sequence Numbers (ISNs) between client and server before data transfer. Confirms bidirectional communication and allocates state at both ends.</p>
+<h4>3-Way Handshake</h4>
+<table class="inline-tbl"><tr><th>Step</th><th>From→To</th><th>Flags</th><th>Seq / Ack</th><th>State change</th></tr>
+<tr><td>1 SYN</td><td>Client→Server</td><td>SYN=1</td><td>Seq=x</td><td>Client: SYN_SENT</td></tr>
+<tr><td>2 SYN-ACK</td><td>Server→Client</td><td>SYN=1,ACK=1</td><td>Seq=y, Ack=x+1</td><td>Server: SYN_RCVD</td></tr>
+<tr><td>3 ACK</td><td>Client→Server</td><td>ACK=1</td><td>Seq=x+1, Ack=y+1</td><td>Both: ESTABLISHED</td></tr></table>
+<h4>Diagram</h4>
+<p>Two vertical timelines (CLIENT | SERVER). Three arrows: →, ←, →. Label flags + seq numbers. Mark ESTABLISHED after step 3.</p>
+<h4>Why 3 steps, not 2?</h4>
+<p>2-way handshake can't prove the client received the server's ISN. Step 3 ACK confirms bidirectional communication.</p>
+<h4>4-Way FIN Connection Termination</h4>
+<table class="inline-tbl"><tr><th>Step</th><th>Direction</th><th>Flags</th><th>State</th></tr>
+<tr><td>1</td><td>Client→Server</td><td>FIN</td><td>Client: FIN_WAIT_1</td></tr>
+<tr><td>2</td><td>Server→Client</td><td>ACK</td><td>Server: CLOSE_WAIT; Client: FIN_WAIT_2</td></tr>
+<tr><td>3</td><td>Server→Client</td><td>FIN</td><td>Server: LAST_ACK</td></tr>
+<tr><td>4</td><td>Client→Server</td><td>ACK</td><td>Client: TIME_WAIT (2×MSL) → CLOSED</td></tr></table>
+<h4>TIME_WAIT</h4>
+<p>Client waits 2×MSL (≈2 min) to ensure the final ACK reached the server and to prevent stale segments from contaminating a new connection on the same port pair.</p>`},
+
+{q:'Compare TCP and UDP — headers, differences, use cases (10M)',u:'III',body:`
+<h4>Overview</h4>
+<p>Both are Layer 4 (Transport) protocols. TCP is connection-oriented and reliable; UDP is connectionless and best-effort. The trade-off is reliability vs speed.</p>
+<h4>Comparison Table</h4>
+<table class="inline-tbl">
+<tr><th>Feature</th><th>TCP</th><th>UDP</th></tr>
+<tr><td>Connection</td><td>Connection-oriented (3-way HS)</td><td>Connectionless</td></tr>
+<tr><td>Reliability</td><td>Guaranteed delivery, retransmission</td><td>Best-effort, no guarantee</td></tr>
+<tr><td>Ordering</td><td>In-order delivery</td><td>No ordering</td></tr>
+<tr><td>Flow control</td><td>Sliding window</td><td>None</td></tr>
+<tr><td>Congestion control</td><td>AIMD (slow start, CA)</td><td>None</td></tr>
+<tr><td>Error check</td><td>Checksum + ACK + retransmit</td><td>Checksum only</td></tr>
+<tr><td>Header size</td><td>20–60 bytes (variable)</td><td>8 bytes (fixed)</td></tr>
+<tr><td>Speed</td><td>Slower (overhead)</td><td>Faster (minimal overhead)</td></tr>
+<tr><td>Use cases</td><td>HTTP, FTP, SMTP, SSH, HTTPS</td><td>DNS, VoIP, streaming, gaming</td></tr>
+</table>
+<h4>TCP Header Fields (20 bytes minimum)</h4>
+<div class="codebox">Source Port (16b) | Dest Port (16b)
+Sequence Number (32b)
+Acknowledgement Number (32b)
+Header Len (4b) | Reserved (6b) | Flags: URG ACK PSH RST SYN FIN (6b)
+Window Size (16b)
+Checksum (16b) | Urgent Pointer (16b)
+Options (0–40b, variable)</div>
+<h4>UDP Header Fields (8 bytes fixed)</h4>
+<div class="codebox">Source Port (16b) | Dest Port (16b)
+Length (16b) | Checksum (16b)</div>
+<h4>When to choose UDP</h4>
+<p>When low latency matters more than reliability: DNS (short query, easy retry), VoIP (loss tolerable, delay is not), live video streaming, multiplayer gaming, QUIC (reliability built on top of UDP).</p>`},
+
+{q:'DNS — Architecture, Hierarchy, Recursive vs Iterative Resolution (10M)',u:'III',body:`
+<h4>Definition</h4>
+<p>DNS (Domain Name System) is the internet's distributed hierarchical naming system. It translates human-readable hostnames (www.example.com) to IP addresses (142.250.x.x). Without DNS you'd memorize numeric IPs.</p>
+<h4>Hierarchy — 4 levels</h4>
+<table class="inline-tbl">
+<tr><th>Level</th><th>Role</th><th>Example</th></tr>
+<tr><td>Root DNS servers</td><td>13 logical servers worldwide. Know all TLD server addresses.</td><td>a.root-servers.net</td></tr>
+<tr><td>TLD servers</td><td>One per top-level domain. Know authoritative servers under them.</td><td>.com, .org, .in</td></tr>
+<tr><td>Authoritative DNS</td><td>Official source for a domain. Stores A, AAAA, MX records.</td><td>ns1.google.com</td></tr>
+<tr><td>Local DNS (Resolver)</td><td>First contact for client. Caches results via TTL.</td><td>ISP resolver, 8.8.8.8</td></tr>
+</table>
+<h4>Recursive vs Iterative Resolution</h4>
+<p><b>Recursive:</b> Client asks Local DNS → Local DNS queries Root → TLD → Authoritative on client's behalf → returns final IP. Local resolver does all the work.</p>
+<p><b>Iterative:</b> Local DNS gets a referral from Root, then queries TLD itself, then Authoritative. Client makes each query directly in some implementations.</p>
+<h4>Diagram — draw this</h4>
+<p>Client → Local DNS (cache check) → Root DNS → TLD DNS → Authoritative DNS → IP returned. Arrows down (queries), arrows up (answers). Caching loop at Local DNS labeled with TTL.</p>
+<h4>Record Types</h4>
+<table class="inline-tbl">
+<tr><th>Type</th><th>Maps</th><th>Example</th></tr>
+<tr><td>A</td><td>hostname → IPv4</td><td>example.com → 93.184.216.34</td></tr>
+<tr><td>AAAA</td><td>hostname → IPv6</td><td>example.com → 2001:db8::1</td></tr>
+<tr><td>MX</td><td>domain → mail server</td><td>example.com → mail.example.com</td></tr>
+<tr><td>CNAME</td><td>alias → canonical name</td><td>www → example.com</td></tr>
+<tr><td>NS</td><td>zone → name server</td><td>example.com → ns1.example.com</td></tr>
+</table>
+<h4>Conclusion</h4>
+<p>DNS is critical internet infrastructure — a distributed database with TTL-based caching enabling scalable, resilient name resolution for billions of queries per day.</p>`},
+
+{q:'HTTP — Request/Response, Persistent vs Non-Persistent (10M)',u:'III',body:`
+<h4>Definition</h4>
+<p>HTTP (HyperText Transfer Protocol) is a stateless, application-layer protocol for transferring web resources. It runs over TCP, typically on port 80 (HTTP) or 443 (HTTPS). Client sends request → server sends response.</p>
+<h4>HTTP Request Format</h4>
+<div class="codebox">GET /index.html HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0
+Accept: text/html
+Connection: keep-alive
+[blank line]
+[optional body for POST]</div>
+<h4>HTTP Response Format</h4>
+<div class="codebox">HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 1234
+Date: Mon, 01 Jan 2024 10:00:00 GMT
+[blank line]
+[response body — HTML content]</div>
+<h4>Common Status Codes</h4>
+<table class="inline-tbl">
+<tr><th>Code</th><th>Meaning</th></tr>
+<tr><td>200 OK</td><td>Success</td></tr>
+<tr><td>301 Moved Permanently</td><td>Resource moved — redirect</td></tr>
+<tr><td>404 Not Found</td><td>Resource doesn't exist</td></tr>
+<tr><td>500 Internal Server Error</td><td>Server-side failure</td></tr>
+</table>
+<h4>Non-Persistent HTTP (HTTP/1.0)</h4>
+<p>Each object requires a separate TCP connection. Steps per object: TCP SYN → SYN-ACK → ACK → HTTP Request → HTTP Response → TCP FIN. 2 RTTs + transmission time per object. <b>Inefficient.</b></p>
+<h4>Persistent HTTP (HTTP/1.1 default)</h4>
+<p>Single TCP connection used for multiple objects. Pipeline allows multiple requests without waiting for responses. <b>Much more efficient</b> — 1 RTT for TCP setup, then all objects in sequence.</p>
+<h4>Comparison</h4>
+<table class="inline-tbl">
+<tr><th>Feature</th><th>Non-Persistent</th><th>Persistent</th></tr>
+<tr><td>TCP connections</td><td>1 per object</td><td>1 for all objects</td></tr>
+<tr><td>RTTs per object</td><td>2 RTT</td><td>1 RTT after setup</td></tr>
+<tr><td>Version</td><td>HTTP/1.0</td><td>HTTP/1.1+</td></tr>
+<tr><td>Performance</td><td>Poor</td><td>Good</td></tr>
+</table>
+<h4>Conclusion</h4>
+<p>HTTP's stateless design and persistent connections make the web scalable. HTTP/2 further improves with multiplexing; HTTP/3 moves to QUIC (UDP-based) for even lower latency.</p>`},
+
+{q:'Ethernet — CSMA/CD, Frame Format, MAC Addressing (10M)',u:'II',body:`
+<h4>Definition</h4>
+<p>Ethernet is the dominant wired LAN technology (IEEE 802.3). It uses CSMA/CD for medium access control on shared channels and uniquely identifies devices via MAC addresses.</p>
+<h4>CSMA/CD — Carrier Sense Multiple Access with Collision Detection</h4>
+<p><b>Steps:</b></p>
+<p>1. <b>Carrier Sense:</b> Before transmitting, listen — if channel busy, wait.</p>
+<p>2. <b>Multiple Access:</b> Any node can transmit when channel is idle.</p>
+<p>3. <b>Collision Detection:</b> While transmitting, monitor channel. If collision detected (signal level spikes), stop transmitting immediately.</p>
+<p>4. <b>Jam Signal:</b> Broadcast 48-bit jam signal to ensure all nodes detect the collision.</p>
+<p>5. <b>Binary Exponential Backoff:</b> After nth collision, wait random time in [0, 2ⁿ-1] slot-times, then retry. After 16 failures, discard frame.</p>
+<h4>Ethernet Frame Format</h4>
+<div class="codebox">| Preamble (7B) | SFD (1B) | Dest MAC (6B) | Src MAC (6B) | Type/Length (2B) | Data (46–1500B) | FCS/CRC (4B) |</div>
+<table class="inline-tbl">
+<tr><th>Field</th><th>Size</th><th>Purpose</th></tr>
+<tr><td>Preamble</td><td>7 bytes</td><td>Synchronization (10101010...)</td></tr>
+<tr><td>SFD (Start Frame Delimiter)</td><td>1 byte</td><td>10101011 — marks frame start</td></tr>
+<tr><td>Dest / Src MAC</td><td>6 bytes each</td><td>Physical addresses</td></tr>
+<tr><td>Type/Length</td><td>2 bytes</td><td>>1500 = EtherType (IPv4=0x0800); ≤1500 = payload length</td></tr>
+<tr><td>Data (payload)</td><td>46–1500 bytes</td><td>IP datagram (padded if <46B)</td></tr>
+<tr><td>FCS / CRC</td><td>4 bytes</td><td>Error detection (CRC-32)</td></tr>
+</table>
+<h4>MAC Address</h4>
+<p>48-bit (6-byte) hardware address burned into NIC. Written as XX:XX:XX:XX:XX:XX (hex). First 3 bytes = OUI (manufacturer); last 3 bytes = device serial. Broadcast: FF:FF:FF:FF:FF:FF.</p>
+<h4>CRC (Cyclic Redundancy Check)</h4>
+<p>Sender: append remainder of (data / generator polynomial) to frame. Receiver: divide received frame by same polynomial — if remainder ≠ 0, frame is corrupted. CRC-32 detects all burst errors ≤32 bits.</p>
+<h4>Conclusion</h4>
+<p>Ethernet's CSMA/CD made shared-medium LANs practical. Modern switched Ethernet uses full-duplex point-to-point links eliminating collisions entirely, but the frame format remains unchanged.</p>`},
+
+{q:'IEEE 802.11 Wireless LAN — CSMA/CA, Architecture, Frame (10M)',u:'IV',body:`
+<h4>Definition</h4>
+<p>IEEE 802.11 (Wi-Fi) defines wireless LAN standards. Unlike wired Ethernet, wireless cannot detect collisions (hidden terminal problem), so it uses CSMA/CA (Collision Avoidance) instead of CSMA/CD.</p>
+<h4>Why CSMA/CA not CSMA/CD?</h4>
+<p><b>Hidden Terminal Problem:</b> Node A and C are both in range of B but not each other. A and C cannot detect each other's transmissions → collision at B. CSMA/CD would miss this.</p>
+<p><b>Solution — CSMA/CA with RTS/CTS:</b></p>
+<p>1. Sender broadcasts RTS (Request-to-Send) to AP</p>
+<p>2. AP replies CTS (Clear-to-Send) — heard by all nodes in range</p>
+<p>3. All other nodes defer transmission for the CTS duration</p>
+<p>4. Sender transmits; AP sends ACK on success</p>
+<h4>CSMA/CA Steps (without RTS/CTS)</h4>
+<p>1. Sense channel — if idle for DIFS time, transmit. If busy, wait.</p>
+<p>2. If channel becomes idle, wait random backoff (binary exponential).</p>
+<p>3. Transmit full frame. Wait for ACK. If no ACK → collision assumed → retry.</p>
+<h4>Network Architectures</h4>
+<table class="inline-tbl">
+<tr><th>Mode</th><th>Infrastructure</th><th>Ad-hoc (IBSS)</th></tr>
+<tr><td>Access Point</td><td>Yes (AP required)</td><td>No</td></tr>
+<tr><td>Range</td><td>AP extends range</td><td>Limited by node distance</td></tr>
+<tr><td>Use</td><td>Home, enterprise Wi-Fi</td><td>Direct device-to-device</td></tr>
+</table>
+<h4>802.11 Frame Format</h4>
+<div class="codebox">| Frame Control (2B) | Duration (2B) | Addr1 (6B) | Addr2 (6B) | Addr3 (6B) | Seq Control (2B) | [Addr4 (6B)] | Data | FCS (4B) |</div>
+<p>Note: 802.11 has up to <b>4 MAC addresses</b> (vs Ethernet's 2) to support AP bridging, source, destination, and BSSID.</p>
+<h4>802.11 Standards Evolution</h4>
+<table class="inline-tbl">
+<tr><th>Standard</th><th>Freq</th><th>Max Speed</th></tr>
+<tr><td>802.11b</td><td>2.4 GHz</td><td>11 Mbps</td></tr>
+<tr><td>802.11g</td><td>2.4 GHz</td><td>54 Mbps</td></tr>
+<tr><td>802.11n (Wi-Fi 4)</td><td>2.4/5 GHz</td><td>600 Mbps</td></tr>
+<tr><td>802.11ac (Wi-Fi 5)</td><td>5 GHz</td><td>3.5 Gbps</td></tr>
+<tr><td>802.11ax (Wi-Fi 6)</td><td>2.4/5/6 GHz</td><td>9.6 Gbps</td></tr>
+</table>
+<h4>Conclusion</h4>
+<p>IEEE 802.11 standardized wireless LANs using CSMA/CA to handle the unique challenges of shared wireless medium, including the hidden terminal problem and half-duplex operation.</p>`},
+
+{q:'MANET and AODV Routing Protocol (10M)',u:'V',body:`
+<h4>Definition</h4>
+<p>MANET (Mobile Ad-hoc NETwork): infrastructure-less, self-configuring wireless network. Each node acts as both host and router. No fixed base stations or wired backbone.</p>
+<h4>Characteristics</h4>
+<p>Dynamic topology (nodes move), multi-hop routing, limited bandwidth, energy constraints, no central administration, frequent link failures, self-healing.</p>
+<h4>Routing Protocol Types</h4>
+<table class="inline-tbl">
+<tr><th>Type</th><th>Strategy</th><th>Overhead</th><th>Route latency</th><th>Examples</th></tr>
+<tr><td>Proactive (table-driven)</td><td>Maintain routes always</td><td>High</td><td>Zero</td><td>DSDV, OLSR</td></tr>
+<tr><td>Reactive (on-demand)</td><td>Discover routes when needed</td><td>Low</td><td>Discovery delay</td><td>AODV, DSR</td></tr>
+<tr><td>Hybrid</td><td>Proactive within zone, reactive outside</td><td>Medium</td><td>Low</td><td>ZRP</td></tr>
+</table>
+<h4>AODV — Ad-hoc On-demand Distance Vector (most important)</h4>
+<p><b>Route Discovery:</b></p>
+<p>1. Source broadcasts <b>RREQ</b> (Route REQuest) with: src addr, dest addr, sequence numbers, hop count</p>
+<p>2. Intermediate nodes forward RREQ if they don't have a fresh route. Each node records reverse path (for RREP to follow back).</p>
+<p>3. Destination (or node with fresh route) unicasts <b>RREP</b> (Route REPly) back along reverse path.</p>
+<p>4. Source receives RREP → starts data transmission along established path.</p>
+<p><b>Route Maintenance:</b> Link break detected → upstream node sends <b>RERR</b> (Route ERRor) toward source → source rediscovers route.</p>
+<h4>Key AODV Features</h4>
+<p>Sequence numbers prevent stale routes and loops. Only active routes maintained (no full routing table). Reverse path setup during RREQ flood enables efficient RREP.</p>
+<h4>Applications</h4>
+<p>Military battlefield (infrastructure destroyed), disaster recovery, vehicular networks (VANET), sensor networks, temporary event networking.</p>
+<h4>Conclusion</h4>
+<p>AODV's on-demand approach minimizes overhead in high-mobility environments. Sequence numbers make it loop-free and more reliable than older DV-based schemes.</p>`},
+
+{q:'VPN — Architecture, IPSec Modes, Types (10M)',u:'V',body:`
+<h4>Definition</h4>
+<p>VPN (Virtual Private Network) creates an encrypted, private communication tunnel over a public network (internet), making geographically separated networks appear as a single private network.</p>
+<h4>Architecture</h4>
+<p>VPN Client → Encrypted Tunnel → Internet → VPN Gateway / Concentrator → Private Corporate Network. All traffic inside the tunnel is encrypted and authenticated.</p>
+<h4>Core Protocol: IPSec</h4>
+<p>IPSec operates at Network Layer (L3). Two security protocols:</p>
+<table class="inline-tbl">
+<tr><th>Protocol</th><th>Provides</th><th>Encryption</th></tr>
+<tr><td>AH (Authentication Header)</td><td>Integrity + Authentication</td><td>No</td></tr>
+<tr><td>ESP (Encapsulating Security Payload)</td><td>Encryption + optional Authentication</td><td>Yes</td></tr>
+</table>
+<p><b>IPSec Modes:</b></p>
+<table class="inline-tbl">
+<tr><th>Mode</th><th>Scope</th><th>Use case</th></tr>
+<tr><td>Transport Mode</td><td>Encrypts payload only; original IP header preserved</td><td>Host-to-host</td></tr>
+<tr><td>Tunnel Mode</td><td>Encrypts entire original IP packet; new IP header added</td><td>Gateway-to-gateway (site-to-site VPN)</td></tr>
+</table>
+<h4>Other Tunneling Protocols</h4>
+<p><b>PPTP:</b> Old, GRE tunneling, weak encryption — avoid.<br>
+<b>L2TP/IPSec:</b> Layer 2 tunneling + IPSec encryption; common on mobile.<br>
+<b>SSL/TLS VPN:</b> Works over HTTPS port 443; browser-based, no client software; firewall-friendly.</p>
+<h4>VPN Types</h4>
+<table class="inline-tbl">
+<tr><th>Type</th><th>Description</th><th>Protocol</th></tr>
+<tr><td>Site-to-site</td><td>Connects two office networks via internet permanently</td><td>IPSec Tunnel</td></tr>
+<tr><td>Remote access</td><td>Individual user → corporate network from home/travel</td><td>SSL VPN or IPSec</td></tr>
+<tr><td>Extranet</td><td>Organization ↔ trusted partners/suppliers</td><td>IPSec</td></tr>
+</table>
+<h4>Advantages</h4>
+<p>Data confidentiality and integrity, remote work enablement, cost savings vs leased lines, bypass geo-restrictions, secure branch connectivity.</p>
+<h4>Conclusion</h4>
+<p>VPNs are foundational enterprise security infrastructure. IPSec Tunnel mode for site-to-site; SSL VPN for clientless remote access; L2TP/IPSec for mobile devices.</p>`},
+
+{q:'Mobile IP — Home Agent, Foreign Agent, Registration, Triangle Routing (10M)',u:'IV',body:`
+<h4>Problem Mobile IP Solves</h4>
+<p>Standard IP routes based on network prefix. When a mobile node moves to a new network, its IP changes → existing connections break. Mobile IP lets a node keep its Home Address while roaming to any network.</p>
+<h4>Key Entities</h4>
+<table class="inline-tbl">
+<tr><th>Entity</th><th>Role</th></tr>
+<tr><td>Mobile Node (MN)</td><td>Mobile device with permanent Home Address</td></tr>
+<tr><td>Home Agent (HA)</td><td>Router on home network. Intercepts packets for MN, tunnels them to foreign network.</td></tr>
+<tr><td>Foreign Agent (FA)</td><td>Router on visited network. Provides Care-of-Address, de-tunnels packets for MN.</td></tr>
+<tr><td>Care-of-Address (CoA)</td><td>Temporary IP on foreign network. FA-CoA (shared) or Co-located CoA (MN's own).</td></tr>
+<tr><td>Correspondent Node (CN)</td><td>Any host communicating with MN.</td></tr>
+</table>
+<h4>Registration Process (5 steps)</h4>
+<p>1. MN arrives at foreign network → receives FA Agent Advertisement (ICMP extension)<br>
+2. MN sends <b>Registration Request</b> to FA: {Home Address, CoA, HA address, lifetime}<br>
+3. FA forwards Registration Request to HA<br>
+4. HA authenticates MN → creates <b>mobility binding</b>: Home Address → CoA<br>
+5. HA sends <b>Registration Reply</b> → FA → MN (confirmed)</p>
+<h4>Data Flow — Triangle Routing</h4>
+<p>CN → packet to Home Address → HA intercepts → HA encapsulates (IP-in-IP) → tunnels to CoA → FA de-encapsulates → delivers to MN.</p>
+<p>Return path: MN → CN directly (no HA involved on return).</p>
+<h4>Diagram</h4>
+<p>Draw: CN → Home Network (HA) ──tunnel──→ Foreign Network (FA) → MN. Label Home Address at top, CoA at bottom. Show tunnel as double-headed arrow with encapsulated packet.</p>
+<h4>Triangle Routing Problem</h4>
+<p>CN must route through HA even if CN is geographically close to MN → inefficient. <b>Route Optimization</b> (optional extension): HA sends CN a Binding Update → CN sends directly to CoA, bypassing HA.</p>
+<h4>Conclusion</h4>
+<p>Mobile IP enables seamless mobility by decoupling identity (Home Address) from location (CoA). Triangle routing is the main limitation; Route Optimization addresses it.</p>`},
+
+{q:'MPLS — Label Switching, FEC, LSP Architecture (10M)',u:'V',body:`
+<h4>Definition</h4>
+<p>MPLS (Multi-Protocol Label Switching) is a high-performance packet forwarding technique that routes traffic based on short fixed-length labels instead of long IP address lookups. Operates between Layer 2 and Layer 3 ("Layer 2.5").</p>
+<h4>Key Concepts</h4>
+<table class="inline-tbl">
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>Label</td><td>20-bit fixed-length identifier added to packet. Determines next hop and actions.</td></tr>
+<tr><td>FEC (Forwarding Equivalence Class)</td><td>Group of packets treated identically (same route, QoS, etc.). All packets in one FEC get the same label.</td></tr>
+<tr><td>LSP (Label Switched Path)</td><td>Pre-established path through the MPLS network from ingress to egress.</td></tr>
+<tr><td>LER (Label Edge Router)</td><td>Entry/exit point. Ingress LER assigns labels; Egress LER removes them.</td></tr>
+<tr><td>LSR (Label Switching Router)</td><td>Core router. Forwards based on label only — no IP lookup needed.</td></tr>
+</table>
+<h4>MPLS Label Format (32 bits)</h4>
+<div class="codebox">| Label (20b) | Exp/TC (3b) | S (stack bottom, 1b) | TTL (8b) |</div>
+<h4>Packet Flow Through MPLS</h4>
+<p>1. Packet arrives at Ingress LER → classified into FEC → label assigned → pushed onto packet<br>
+2. At each LSR: swap label (lookup label in LFIB → replace with next label) → forward to next LSR<br>
+3. At Egress LER: pop label → forward as normal IP packet</p>
+<h4>Operations: Push / Swap / Pop</h4>
+<table class="inline-tbl">
+<tr><th>Operation</th><th>Where</th><th>Action</th></tr>
+<tr><td>Push</td><td>Ingress LER</td><td>Add label to packet</td></tr>
+<tr><td>Swap</td><td>Core LSR</td><td>Replace incoming label with outgoing label</td></tr>
+<tr><td>Pop</td><td>Egress LER or penultimate LSR (PHP)</td><td>Remove label</td></tr>
+</table>
+<h4>Advantages of MPLS</h4>
+<p>Fast forwarding (label lookup vs IP lookup), Traffic Engineering (explicit routing, load balancing), QoS support via FEC, VPN support (MPLS VPN), protocol-independent (runs over any L2).</p>
+<h4>Conclusion</h4>
+<p>MPLS decouples routing decisions from packet forwarding. Once the LSP is established, core routers just swap labels — much faster than longest-prefix IP lookups. Widely used in ISP backbone networks.</p>`},
+
+{q:'Wireless Sensor Networks — Architecture, Clustering, Energy Model (10M)',u:'V',body:`
+<h4>Definition</h4>
+<p>WSN (Wireless Sensor Network): a distributed network of spatially distributed sensor nodes that monitor physical/environmental conditions (temperature, pressure, motion) and communicate wirelessly to a base station (sink).</p>
+<h4>Characteristics</h4>
+<p>Large number of nodes (hundreds–thousands), energy constrained (battery-powered), limited computation/memory/bandwidth, self-organizing, multi-hop communication, unattended deployment.</p>
+<h4>Architecture</h4>
+<table class="inline-tbl">
+<tr><th>Component</th><th>Role</th></tr>
+<tr><td>Sensor Node</td><td>Senses environment, processes data locally, forwards to cluster head or base station</td></tr>
+<tr><td>Cluster Head (CH)</td><td>Aggregates data from cluster members; responsible for direct communication with base station</td></tr>
+<tr><td>Base Station (Sink)</td><td>Collects all data; connected to internet/user; high power (no constraint)</td></tr>
+</table>
+<h4>Clustering — LEACH Protocol</h4>
+<p><b>Why cluster?</b> Direct transmission to base station is energy-expensive for distant nodes. Clustering creates local leaders (CHs) that aggregate and compress data before long-range transmission.</p>
+<p><b>LEACH (Low-Energy Adaptive Clustering Hierarchy):</b></p>
+<p>1. <b>Setup phase:</b> Nodes decide stochastically whether to become CH using probability: P = k/n (k=desired CHs, n=total nodes). CH broadcasts advertisement.</p>
+<p>2. <b>Cluster formation:</b> Each non-CH joins nearest CH (based on signal strength). CH creates TDMA schedule.</p>
+<p>3. <b>Steady-state phase:</b> Nodes send data to CH in assigned time slots. CH aggregates and transmits to base station.</p>
+<p>4. <b>Round ends:</b> New CH election for next round — rotates CH role to balance energy drain.</p>
+<h4>Energy Model</h4>
+<p>Transmitting k bits over distance d: E_tx = k·E_elec + k·ε_amp·d² (free space) or k·ε_mp·d⁴ (multipath).<br>
+Receiving k bits: E_rx = k·E_elec.<br>
+Cluster head fusion: E_DA = k·E_DA per bit.<br>
+<b>Goal:</b> Minimize total energy consumed across all nodes → maximize network lifetime.</p>
+<h4>Applications</h4>
+<p>Environmental monitoring (forest fire, flood), military surveillance, precision agriculture, structural health monitoring, smart homes, medical patient monitoring.</p>
+<h4>Conclusion</h4>
+<p>WSN design is dominated by energy optimization. Clustering protocols like LEACH extend network lifetime by distributing the energy-intensive relay role across nodes through rotation.</p>`},
+
+{q:'OSI Reference Model \u2014 7 layers, functions, diagram (10M) \u00b7 90% papers',u:'I',body:`
+<h4>Definition</h4>
+<p>The OSI (Open Systems Interconnection) model is a 7-layer conceptual framework standardized by ISO that defines how data communication occurs between heterogeneous systems. Each layer has a specific role and only communicates with layers directly above and below it.</p>
+<h4>The 7 Layers</h4>
+<table class="inline-tbl">
+<tr><th>No.</th><th>Name</th><th>Function</th><th>Protocols / Examples</th></tr>
+<tr><td>7</td><td>Application</td><td>Network services to end-user apps (web, email, file transfer)</td><td>HTTP, FTP, SMTP, DNS, Telnet</td></tr>
+<tr><td>6</td><td>Presentation</td><td>Data translation, encryption/decryption, compression</td><td>SSL/TLS, JPEG, MPEG, ASCII</td></tr>
+<tr><td>5</td><td>Session</td><td>Establishes, manages, terminates sessions; dialog control</td><td>NetBIOS, RPC, PPTP</td></tr>
+<tr><td>4</td><td>Transport</td><td>End-to-end delivery, segmentation, flow &amp; congestion control</td><td>TCP, UDP, SCTP</td></tr>
+<tr><td>3</td><td>Network</td><td>Logical addressing, routing across networks, packet forwarding</td><td>IP (v4/v6), ICMP, ARP, OSPF</td></tr>
+<tr><td>2</td><td>Data Link</td><td>Node-to-node delivery, framing, MAC addressing, CRC error detection</td><td>Ethernet, 802.11, PPP, HDLC</td></tr>
+<tr><td>1</td><td>Physical</td><td>Raw bit transmission; defines electrical/optical/mechanical specs</td><td>Cables, fiber, radio, hubs, DSL</td></tr>
+</table>
+<h4>Data Encapsulation (sender \u2192 receiver)</h4>
+<div class="codebox">Application  \u2192  Data
+Transport    \u2192  Segment   (TCP/UDP header added)
+Network      \u2192  Packet    (IP header added)
+Data Link    \u2192  Frame     (MAC header + CRC trailer added)
+Physical     \u2192  Bits      (electrical/optical signals)</div>
+<h4>PDU Names per Layer</h4>
+<p>Layer 4: <b>Segment</b> | Layer 3: <b>Packet</b> | Layer 2: <b>Frame</b> | Layer 1: <b>Bits</b> | Layer 5-7: <b>Data / Message</b></p>
+<h4>OSI vs TCP/IP</h4>
+<table class="inline-tbl">
+<tr><th>OSI Layers</th><th>TCP/IP Layer</th><th>Note</th></tr>
+<tr><td>7 Application + 6 Presentation + 5 Session</td><td>Application</td><td>TCP/IP merges these 3</td></tr>
+<tr><td>4 Transport</td><td>Transport</td><td>TCP, UDP</td></tr>
+<tr><td>3 Network</td><td>Internet</td><td>IP, ICMP</td></tr>
+<tr><td>2 Data Link + 1 Physical</td><td>Network Access</td><td>TCP/IP merges these 2</td></tr>
+</table>
+<h4>Conclusion</h4>
+<p>OSI is a theoretical reference model; TCP/IP is the practical implementation. OSI is used for teaching and troubleshooting; TCP/IP runs the actual internet. Both use layering to allow independent development of protocols.</p>`},,
+
+{q:"Dijkstra's Algorithm — worked example, complexity, vs Distance Vector (10M) · 90% papers",u:'II',body:`
+<h4>Context: Link State Routing</h4>
+<p>In Link State routing, each router floods its direct link costs (LSAs) to all other routers so every router has a complete topology map. Dijkstra is then run locally to find shortest paths.</p>
+<h4>Algorithm</h4>
+<div class="codebox">Initialize: D(src)=0, D(all others)=∞, N'={src}
+Loop until N' = all nodes:
+  1. Pick u ∉ N' with smallest D(u)
+  2. Add u to N'
+  3. For each neighbor v of u, v ∉ N':
+       if D(u) + c(u,v) < D(v):
+           D(v) = D(u) + c(u,v)
+           prev(v) = u    ← record path</div>
+<h4>Worked Example — memorize and reproduce this in exam</h4>
+<p>Graph: A–B=2, A–C=5, B–C=2, B–D=6, C–D=1, C–E=4, D–E=3. Source = A.</p>
+<table class="inline-tbl">
+<tr><th>Step</th><th>N'</th><th>D(B)</th><th>D(C)</th><th>D(D)</th><th>D(E)</th><th>Node chosen</th></tr>
+<tr><td>Init</td><td>{A}</td><td>2</td><td>5</td><td>∞</td><td>∞</td><td>—</td></tr>
+<tr><td>1</td><td>{A,B}</td><td>—</td><td>min(5, 2+2)=4</td><td>2+6=8</td><td>∞</td><td>B (D=2)</td></tr>
+<tr><td>2</td><td>{A,B,C}</td><td>—</td><td>—</td><td>min(8, 4+1)=5</td><td>4+4=8</td><td>C (D=4)</td></tr>
+<tr><td>3</td><td>{A,B,C,D}</td><td>—</td><td>—</td><td>—</td><td>min(8, 5+3)=8</td><td>D (D=5)</td></tr>
+<tr><td>4</td><td>{A,B,C,D,E}</td><td>—</td><td>—</td><td>—</td><td>8</td><td>E (D=8)</td></tr>
+</table>
+<p><b>Shortest paths from A:</b> A→B=2 &nbsp;|&nbsp; A→B→C=4 &nbsp;|&nbsp; A→B→C→D=5 &nbsp;|&nbsp; A→B→C→E=8</p>
+<h4>Complexity</h4>
+<p>O(n²) with adjacency matrix. O((n+e) log n) with min-heap priority queue. n=nodes, e=edges.</p>
+<h4>Used in OSPF</h4>
+<p>Each OSPF router floods LSAs to all others. After flooding completes, every router independently runs Dijkstra → identical, loop-free routing tables across the area.</p>
+<h4>Dijkstra (LS) vs Bellman-Ford (DV)</h4>
+<table class="inline-tbl">
+<tr><th>Aspect</th><th>Dijkstra / Link State</th><th>Bellman-Ford / Distance Vector</th></tr>
+<tr><td>Topology view</td><td>Complete graph</td><td>Neighbor costs only</td></tr>
+<tr><td>Convergence speed</td><td>Fast</td><td>Slow</td></tr>
+<tr><td>Count-to-infinity</td><td>No</td><td>Yes</td></tr>
+<tr><td>Overhead</td><td>High (LSA flooding)</td><td>Low (only neighbor exchange)</td></tr>
+<tr><td>Used in</td><td>OSPF, IS-IS</td><td>RIP (DV), BGP (path vector)</td></tr>
+</table>
+<h4>Conclusion</h4>
+<p>Dijkstra guarantees optimal, loop-free shortest paths. OSPF uses it for fast convergence in enterprise and ISP networks. Distance Vector (RIP) is simpler but prone to count-to-infinity and slow convergence.</p>`},
+
+{q:'Distance Vector Routing \u2014 Bellman-Ford, Count-to-Infinity, Fixes (10M)',u:'II',body:`
+<h4>Definition</h4>
+<p>Distance Vector Routing: each router maintains a table of (destination, cost, next-hop) and periodically shares its table with direct neighbors only. Routes are updated using the Bellman-Ford equation.</p>
+<h4>Bellman-Ford Equation</h4>
+<div class="codebox">D(x, y) = min over all neighbors v { c(x,v) + D(v,y) }
+Where:
+  D(x,y) = x's best estimate of distance to y
+  c(x,v) = direct cost from x to neighbor v
+  D(v,y) = v's advertised distance to y</div>
+<h4>Operation</h4>
+<p>1. Initialize: D(self)=0, D(others)=\u221e.</p>
+<p>2. Send distance vector to all neighbors periodically (RIP: every 30s).</p>
+<p>3. On receiving neighbor DV, apply Bellman-Ford. If any distance improves \u2192 update table \u2192 send updated DV to neighbors.</p>
+<p>4. Repeat until no updates (convergence).</p>
+<h4>Count-to-Infinity Problem</h4>
+<p><b>Setup:</b> A \u2014 B \u2014 C in series. A-B cost=1, B-C cost=2. Link A-B fails.</p>
+<p><b>What should happen:</b> B sets D(A)=\u221e. But before it does, C still thinks D(A)=3 (via B). B hears from C: "I can reach A in 3" \u2192 B sets D(A) = 1+3 = 4 via C. C then sees B says 4 \u2192 C sets D(A) = 2+4 = 6. They keep incrementing toward \u221e. RIP stops at 16 = unreachable.</p>
+<h4>Solutions</h4>
+<table class="inline-tbl">
+<tr><th>Fix</th><th>How</th><th>Limitation</th></tr>
+<tr><td>Split Horizon</td><td>Don't advertise a route to the neighbor you learned it from</td><td>Fails with 3-node loops</td></tr>
+<tr><td>Poisoned Reverse</td><td>Advertise learned routes back as \u221e (poison) to neighbor</td><td>Increases packet size</td></tr>
+<tr><td>Hold-down timers</td><td>Freeze route updates for a timeout period after route goes down</td><td>Slows convergence</td></tr>
+<tr><td>Max hop count</td><td>RIP: 16 hops = \u221e (network size limited to 15 hops)</td><td>Limits scalability</td></tr>
+</table>
+<h4>Advantages of Distance Vector</h4>
+<p>Simple to implement, low bandwidth (only neighbor exchange), works without global topology knowledge. Used in RIP.</p>
+<h4>Disadvantages</h4>
+<p>Slow convergence, count-to-infinity, not scalable beyond 15 hops (RIP). Link State (OSPF) is preferred for large networks.</p>
+<h4>Conclusion</h4>
+<p>Distance Vector is elegant but fragile. Count-to-infinity is its fatal flaw at scale. Poisoned reverse + hold-down timers reduce but don't eliminate the problem. OSPF (Link State) is the modern replacement.</p>`},
+
+{q:'IPv4 Header + Address Classes + IPv6 Header + Transition (10M)',u:'III',body:`
+<h4>IPv4 Header (20 bytes minimum)</h4>
+<div class="codebox">| Version(4b) | IHL(4b) | DSCP/ToS(8b) | Total Length(16b)        |
+| Identification(16b)      | Flags(3b) | Fragment Offset(13b)     |
+| TTL(8b)    | Protocol(8b) | Header Checksum(16b)                 |
+|             Source IP Address (32 bits)                          |
+|          Destination IP Address (32 bits)                        |
+|          Options (variable, present if IHL > 5)                  |</div>
+<table class="inline-tbl">
+<tr><th>Field</th><th>Bits</th><th>Purpose</th></tr>
+<tr><td>Version</td><td>4</td><td>4 = IPv4</td></tr>
+<tr><td>IHL</td><td>4</td><td>Header length in 32b words; min=5 (20 bytes)</td></tr>
+<tr><td>Total Length</td><td>16</td><td>Entire packet size in bytes (max 65,535)</td></tr>
+<tr><td>Identification + Flags + Offset</td><td>32</td><td>Fragmentation support. DF=don't fragment, MF=more fragments</td></tr>
+<tr><td>TTL</td><td>8</td><td>Decremented per router hop; discard at 0</td></tr>
+<tr><td>Protocol</td><td>8</td><td>6=TCP, 17=UDP, 1=ICMP, 89=OSPF</td></tr>
+<tr><td>Header Checksum</td><td>16</td><td>Error check on header only (recomputed each hop)</td></tr>
+</table>
+<h4>IPv4 Address Classes</h4>
+<table class="inline-tbl">
+<tr><th>Class</th><th>First bits</th><th>Range</th><th>Mask</th><th>Networks / Hosts</th></tr>
+<tr><td>A</td><td>0</td><td>1.x.x.x \u2013 126.x.x.x</td><td>/8</td><td>126 nets, 16M hosts each</td></tr>
+<tr><td>B</td><td>10</td><td>128.x.x.x \u2013 191.x.x.x</td><td>/16</td><td>16K nets, 65K hosts</td></tr>
+<tr><td>C</td><td>110</td><td>192.x.x.x \u2013 223.x.x.x</td><td>/24</td><td>2M nets, 254 hosts</td></tr>
+<tr><td>D</td><td>1110</td><td>224.x.x.x \u2013 239.x.x.x</td><td>N/A</td><td>Multicast only</td></tr>
+<tr><td>E</td><td>1111</td><td>240.x.x.x \u2013 255.x.x.x</td><td>N/A</td><td>Reserved/Experimental</td></tr>
+</table>
+<h4>IPv6 Header (40 bytes, fixed)</h4>
+<div class="codebox">| Version(4b) | Traffic Class(8b) | Flow Label(20b)          |
+| Payload Length(16b)  | Next Header(8b) | Hop Limit(8b)        |
+|           Source Address (128 bits = 16 bytes)                   |
+|        Destination Address (128 bits = 16 bytes)                 |</div>
+<p><b>Next Header</b> replaces Protocol field and also chains extension headers (fragmentation, routing, auth).</p>
+<h4>IPv4 vs IPv6</h4>
+<table class="inline-tbl">
+<tr><th>Feature</th><th>IPv4</th><th>IPv6</th></tr>
+<tr><td>Address length</td><td>32 bits</td><td>128 bits</td></tr>
+<tr><td>Header size</td><td>20\u201360B variable</td><td>40B fixed</td></tr>
+<tr><td>Checksum</td><td>Yes (per hop)</td><td>No (L4 handles it)</td></tr>
+<tr><td>Fragmentation</td><td>Routers + hosts</td><td>Source host only</td></tr>
+<tr><td>NAT</td><td>Required</td><td>Not needed</td></tr>
+<tr><td>Security</td><td>IPSec optional</td><td>IPSec mandatory</td></tr>
+<tr><td>Broadcast</td><td>Yes</td><td>No (multicast + anycast)</td></tr>
+<tr><td>Auto-config</td><td>DHCP</td><td>SLAAC</td></tr>
+</table>
+<h4>Transition Mechanisms</h4>
+<p><b>Dual Stack:</b> Node runs both IPv4 and IPv6 simultaneously. Most common approach today.</p>
+<p><b>Tunneling:</b> IPv6 packet encapsulated inside IPv4 for transit through IPv4 networks (6in4, Teredo, ISATAP).</p>
+<p><b>NAT64/DNS64:</b> Translates between IPv6-only clients and IPv4-only servers. Used in mobile networks.</p>
+<h4>Conclusion</h4>
+<p>IPv4 exhaustion (address depletion) drove IPv6 adoption. IPv6's fixed 40B header is faster to process. Dual-stack is the dominant migration strategy for the foreseeable future.</p>`},
+
+{q:'WDM and Optical Network Architecture (10M)',u:'IV',body:`
+<h4>Why Optical Networks?</h4>
+<p>Fiber optic cables carry light signals with enormous bandwidth (terabits/sec), very low attenuation over thousands of km, immunity to EM interference, and near-zero error rates. They form the backbone of all modern long-distance networks.</p>
+<h4>WDM \u2014 Wavelength Division Multiplexing</h4>
+<p>WDM multiplexes multiple independent data streams onto a single fiber by assigning each stream a different wavelength (\u03bb, color) of light. Each \u03bb is a separate channel at full speed.</p>
+<table class="inline-tbl">
+<tr><th>Type</th><th>Channel Spacing</th><th>Max Channels</th><th>Use Case</th></tr>
+<tr><td>CWDM (Coarse)</td><td>20 nm</td><td>Up to 18</td><td>Metro/access, lower cost, shorter reach</td></tr>
+<tr><td>DWDM (Dense)</td><td>0.4\u20130.8 nm</td><td>80\u2013160+</td><td>Long-haul backbone, maximum capacity</td></tr>
+</table>
+<h4>WDM System Components</h4>
+<table class="inline-tbl">
+<tr><th>Component</th><th>Function</th></tr>
+<tr><td>Laser Transmitters</td><td>Generate specific \u03bb for each channel (one laser per channel)</td></tr>
+<tr><td>Optical Multiplexer (MUX)</td><td>Combines all \u03bb onto one fiber using AWG (Arrayed Waveguide Grating) or prism</td></tr>
+<tr><td>Optical Fiber</td><td>Carries all wavelengths simultaneously over long distances</td></tr>
+<tr><td>EDFA (Erbium-Doped Fiber Amplifier)</td><td>Amplifies all \u03bb at once in optical domain \u2014 no O/E/O needed. Placed every 80\u2013100 km.</td></tr>
+<tr><td>Optical Demultiplexer (DEMUX)</td><td>Separates \u03bb back onto individual fibers at destination</td></tr>
+<tr><td>Photodetector (Receiver)</td><td>Converts each \u03bb back to electrical signal</td></tr>
+</table>
+<h4>Optical Switching Elements</h4>
+<p><b>OXC (Optical Cross-Connect):</b> Switches lightpaths from any input port/\u03bb to any output port/\u03bb in the optical domain. Core of optical network nodes.</p>
+<p><b>OADM (Optical Add-Drop Multiplexer):</b> Adds or drops selected \u03bb at intermediate nodes while others pass through transparently. Enables wavelength routing without full O/E/O.</p>
+<h4>Optical Network Architecture</h4>
+<div class="codebox">IP / MPLS Routers (client layer)
+     \u2193 O/E interface
+OTN \u2014 Optical Transport Network (framing, OAM, FEC)
+     \u2193 modulates onto wavelengths
+DWDM Layer (MUX + EDFA amplifiers every ~80km + DEMUX)
+     \u2193 on physical fiber
+Fiber infrastructure (terrestrial / submarine cable)</div>
+<h4>Lightpath Concept</h4>
+<p>An end-to-end optical connection on a specific \u03bb between two nodes. Wavelength assignment problem: allocate \u03bb to lightpaths without conflicts on shared fibers (same as graph coloring).</p>
+<h4>Advantages</h4>
+<p>Multi-terabit/sec per fiber, protocol-transparent (carries any data format), low cost per bit at scale, low latency (speed of light), high reliability.</p>
+<h4>Conclusion</h4>
+<p>WDM turns one fiber into dozens of parallel high-capacity channels. DWDM + EDFA + OXC form the all-optical backbone that carries the entire internet's inter-city and transoceanic traffic.</p>`},
+
+];
+
+/* ─────────────────────────────────────────────
+   18-HR STUDY PLAN
+───────────────────────────────────────────── */
+const plans = [
+  {t:'Block 1 — TCP Mastery (Hours 1–3) ⚡ Do this first',s:[
+    {h:'H1', c:'<b>TCP Header:</b> Draw all fields from memory — seq, ack, flags, window, checksum. Label bit widths.'},
+    {h:'H2', c:'<b>Congestion Control:</b> All 4 phases. Draw the sawtooth graph without notes. Write ssthresh transitions.'},
+    {h:'H3', c:'<b>Handshake + Flow Control:</b> Write full 10M answer without looking. Practice 4-way FIN separately.'},
+  ]},
+  {t:'Block 2 — Network Layer (Hours 4–6)',s:[
+    {h:'H4', c:'<b>IPv4 Header:</b> Draw all fields. Address classes A–E. /24 /16 /8 subnets. CIDR notation.'},
+    {h:'H5', c:'<b>IPv6:</b> 128-bit header fields, advantages over IPv4, transition mechanisms (dual-stack, tunneling, NAT64).'},
+    {h:'H6', c:'<b>DNS:</b> Draw 4-level hierarchy from memory. Recursive vs iterative. All 5 record types.'},
+  ]},
+  {t:'Block 3 — Routing Algorithms (Hours 7–9)',s:[
+    {h:'H7', c:'<b>Dijkstra:</b> Solve a 5-node example completely. Build the full iteration table. Get the shortest path tree.'},
+    {h:'H8', c:'<b>Distance Vector:</b> Bellman-Ford steps. Count-to-infinity problem + solutions (poisoned reverse, split horizon).'},
+    {h:'H9', c:'<b>OSPF vs RIP vs BGP:</b> Write the 8-row comparison table from memory. Know which protocol goes where.'},
+  ]},
+  {t:'Block 4 — Application + Link Layer (Hours 10–12)',s:[
+    {h:'H10', c:'<b>HTTP:</b> Write a real request and response. Persistent vs non-persistent — RTT count for each.'},
+    {h:'H11', c:'<b>Ethernet CSMA/CD:</b> All 5 steps. Frame format fields. CRC — work through a binary division example.'},
+    {h:'H12', c:'<b>OSI vs TCP/IP:</b> Full layer comparison. Functions + protocol examples for every layer.'},
+  ]},
+  {t:'Block 5 — Wireless Networks (Hours 13–15)',s:[
+    {h:'H13', c:'<b>IEEE 802.11:</b> CSMA/CA steps. Hidden terminal + RTS/CTS solution. Frame format (4 addresses). Spec table.'},
+    {h:'H14', c:'<b>Mobile IP:</b> 5-step registration. Triangle routing diagram. Route Optimization.'},
+    {h:'H15', c:'<b>WDM:</b> Wavelength Division Multiplexing concept. Optical switch and router architecture. DWDM vs CWDM.'},
+  ]},
+  {t:'Block 6 — Unit V (Hours 16–18)',s:[
+    {h:'H16', c:'<b>VPN:</b> IPSec — AH vs ESP. Transport vs Tunnel mode. Site-to-site vs remote access vs extranet.'},
+    {h:'H17', c:'<b>MPLS:</b> Push/Swap/Pop operations. Draw packet flow through 3 LSRs with label values changing.'},
+    {h:'H18', c:'<b>MANET + WSN:</b> AODV RREQ/RREP/RERR flow. LEACH clustering phases. Energy model formula.'},
+  ]},
+];
+
+/* ─────────────────────────────────────────────
+   TRACKER CHECKLIST  (22 items, 5 sections)
+───────────────────────────────────────────── */
+const ckSections = [
+  {head:'Unit III — Transport Layer (study first)', items:[
+    'TCP Header — draw all fields with bit widths from memory',
+    'TCP Three-way Handshake — with state transitions (SYN_SENT → ESTABLISHED)',
+    'TCP Congestion Control — all 4 phases + sawtooth diagram',
+    'TCP Flow Control — sliding window, receive buffer, rwnd',
+    'TCP vs UDP — full comparison table (8+ rows)',
+    'IPv4 Header + Address Classes (A/B/C/D/E) + CIDR',
+    'IPv6 Header + advantages over IPv4 + transition mechanisms',
+    'DNS — 4-level hierarchy diagram + recursive vs iterative + record types',
+    'HTTP — request/response format + persistent vs non-persistent (RTT count)',
+  ]},
+  {head:'Unit II — Routing + Link Layer', items:[
+    'Dijkstra Algorithm — solve 5-node example with full iteration table',
+    'Distance Vector + count-to-infinity + poisoned reverse',
+    'OSPF vs RIP vs BGP — 8-row comparison table',
+    'Ethernet CSMA/CD — 5-step algorithm + binary exponential backoff',
+    'Ethernet Frame Format — all fields with sizes',
+    'CRC Error Detection — binary division example',
+  ]},
+  {head:'Unit I — Internet Architecture', items:[
+    'OSI Model — 7 layers with names, functions, protocol examples',
+    'TCP/IP Architecture — 4 layers with protocols per layer',
+    'Packet switching vs circuit switching — comparison',
+  ]},
+  {head:'Unit IV — Wireless', items:[
+    'IEEE 802.11 — CSMA/CA + RTS/CTS + frame format + standards table',
+    'Mobile IP — HA/FA/CoA, 5-step registration, triangle routing diagram',
+  ]},
+  {head:'Unit V — Advanced Networking', items:[
+    'VPN — IPSec (AH+ESP), Transport vs Tunnel mode, 3 VPN types',
+    'MPLS — Push/Swap/Pop, FEC, LSP, packet flow diagram',
+    'MANET AODV — RREQ/RREP/RERR + sequence numbers',
+    'WSN — LEACH clustering phases + energy model formula',
+  ]},
+];
+
+/* ─────────────────────────────────────────────
+   COMPARE TABLES
+───────────────────────────────────────────── */
+const compares = [
+  {title:'TCP vs UDP', rows:[
+    ['Feature','TCP','UDP'],
+    ['Connection','Connection-oriented (3-way HS)','Connectionless'],
+    ['Reliability','Guaranteed, retransmission','Best-effort, no guarantee'],
+    ['Ordering','In-order delivery','No ordering'],
+    ['Flow control','Sliding window (rwnd)','None'],
+    ['Congestion control','AIMD (cwnd)','None'],
+    ['Error detection','Checksum + ACK','Checksum only'],
+    ['Header size','20–60 bytes (variable)','8 bytes (fixed)'],
+    ['Speed','Slower','Faster'],
+    ['Use cases','HTTP, FTP, SMTP, SSH','DNS, VoIP, streaming, gaming'],
+  ]},
+  {title:'OSI Model vs TCP/IP Architecture', rows:[
+    ['OSI Layer No.','OSI Layer Name','TCP/IP Layer','Key Protocols'],
+    ['7','Application','Application','HTTP, FTP, DNS, SMTP, SNMP'],
+    ['6','Presentation','Application','TLS/SSL, JPEG, MPEG, ASCII'],
+    ['5','Session','Application','NetBIOS, RPC, PPTP'],
+    ['4','Transport','Transport','TCP, UDP, SCTP'],
+    ['3','Network','Internet','IP (v4/v6), ICMP, ARP, OSPF'],
+    ['2','Data Link','Network Access','Ethernet, 802.11, PPP, HDLC'],
+    ['1','Physical','Network Access','Cables, fiber, radio, DSL'],
+  ]},
+  {title:'RIP vs OSPF vs BGP', rows:[
+    ['Feature','RIP','OSPF','BGP'],
+    ['Algorithm','Distance Vector','Link State (Dijkstra)','Path Vector'],
+    ['Metric','Hop count (max 15)','Cost (bandwidth-based)','Policy + AS path length'],
+    ['Scope','Small intra-domain','Large intra-domain','Inter-domain (internet)'],
+    ['Convergence','Slow','Fast','Slow'],
+    ['Update trigger','Periodic (30s)','Event-triggered','Event-triggered'],
+    ['Transport','UDP port 520','IP protocol 89','TCP port 179'],
+    ['Scalability','Poor (15 hop limit)','Good (OSPF areas)','Excellent (entire internet)'],
+    ['VLSM/CIDR','RIPv2: yes; v1: no','Yes','Yes'],
+    ['Count-to-infinity','Yes','No','No'],
+  ]},
+  {title:'IPv4 vs IPv6', rows:[
+    ['Feature','IPv4','IPv6'],
+    ['Address length','32 bits','128 bits'],
+    ['Notation','Dotted decimal: 192.168.1.1','Hex colon: 2001:db8::1'],
+    ['Address space','~4.3 billion','340 undecillion (3.4×10³⁸)'],
+    ['Header size','20–60 bytes (variable)','40 bytes (fixed, simpler)'],
+    ['Checksum','Yes (header checksum)','Removed (done by L4)'],
+    ['Fragmentation','Routers and hosts','Hosts only (Path MTU)'],
+    ['NAT','Required (exhaustion)','Not needed'],
+    ['Configuration','Manual or DHCP','SLAAC or DHCPv6'],
+    ['Security','IPSec optional','IPSec mandatory'],
+    ['Broadcast','Yes','No (replaced by multicast)'],
+    ['Flow label','No','Yes (20-bit, QoS support)'],
+  ]},
+  {title:'MANET Routing Protocols', rows:[
+    ['Protocol','Type','Algorithm','Key Feature'],
+    ['DSDV','Proactive','Bellman-Ford','Full routing table; sequence numbers'],
+    ['OLSR','Proactive','Link State with MPR','Multipoint Relays reduce flooding'],
+    ['AODV','Reactive','On-demand DV','RREQ/RREP/RERR; no full table'],
+    ['DSR','Reactive','Source Routing','Full path in packet header'],
+    ['ZRP','Hybrid','Proactive/Reactive','Zone-based; proactive inside, reactive outside'],
+  ]},
+  {title:'IEEE 802.11 vs Ethernet (802.3)', rows:[
+    ['Feature','IEEE 802.11 (Wi-Fi)','IEEE 802.3 (Ethernet)'],
+    ['Medium','Wireless (radio)','Wired (copper/fiber)'],
+    ['Access Control','CSMA/CA (avoid collisions)','CSMA/CD (detect collisions)'],
+    ['Collision detection','Not possible (half-duplex wireless)','Possible (wired)'],
+    ['Addressing','Up to 4 MAC addresses','2 MAC addresses (src, dst)'],
+    ['Speed','Up to 9.6 Gbps (Wi-Fi 6)','Up to 400 Gbps'],
+    ['Range','Tens of meters (indoor)','Up to 100m (Cat6), km (fiber)'],
+    ['Reliability','Lower (interference)','Higher (dedicated medium)'],
+  ]},
+  {title:'VPN Protocols Comparison', rows:[
+    ['Protocol','Layer','Encryption','Key Use Case'],
+    ['IPSec (Tunnel mode)','Layer 3','Yes (ESP)','Site-to-site VPN between gateways'],
+    ['IPSec (Transport mode)','Layer 3','Yes (ESP)','Host-to-host secure communication'],
+    ['L2TP/IPSec','Layer 2+3','Yes (IPSec part)','Remote access on mobile/Windows'],
+    ['SSL/TLS VPN','Layer 7','Yes (TLS)','Clientless browser-based remote access'],
+    ['PPTP','Layer 2','Weak (MPPE)','Legacy; avoid in production'],
+    ['WireGuard','Layer 3','Yes (ChaCha20)','Modern, fast, simple VPN'],
+  ]},
+];
+
+/* ─────────────────────────────────────────────
+   PREDICTED PAPER
+───────────────────────────────────────────── */
+const predictedPaper = [
+  {unit:'Unit I — Internet Architecture', qs:[
+    {n:'Q1a', txt:'Explain the OSI Reference Model. Describe the function of each layer with examples.', m:'10M', p:'qhi'},
+    {n:'Q1b', txt:'Compare TCP/IP architecture with OSI model. What are the advantages of TCP/IP?', m:'10M', p:'qhi'},
+    {n:'OR Q1c', txt:'Explain packet switching and circuit switching. Which is better for internet traffic and why?', m:'10M', p:'qmed'},
+  ]},
+  {unit:'Unit II — Data Link & Routing', qs:[
+    {n:'Q2a', txt:"Explain Dijkstra's link state routing algorithm with a suitable example.", m:'10M', p:'qhi'},
+    {n:'Q2b', txt:'Explain distance vector routing. What is the count-to-infinity problem? How is it solved?', m:'10M', p:'qhi'},
+    {n:'OR Q2c', txt:'Explain Ethernet frame format and CSMA/CD protocol. Also explain CRC error detection.', m:'10M', p:'qhi'},
+    {n:'OR Q2d', txt:'Compare RIP, OSPF, and BGP routing protocols.', m:'5M', p:'qmed'},
+  ]},
+  {unit:'Unit III — Transport & Application Layer (Highest weight)', qs:[
+    {n:'Q3a', txt:'Explain TCP congestion control mechanism. Describe slow start, congestion avoidance, fast retransmit, and fast recovery with a diagram.', m:'10M', p:'qhi'},
+    {n:'Q3b', txt:'Explain TCP three-way handshake and connection termination. What is TIME_WAIT?', m:'10M', p:'qhi'},
+    {n:'OR Q3c', txt:'Compare TCP and UDP. Explain TCP and UDP header formats.', m:'10M', p:'qhi'},
+    {n:'OR Q3d', txt:'Explain DNS architecture. Differentiate between recursive and iterative resolution.', m:'10M', p:'qhi'},
+    {n:'OR Q3e', txt:'Compare IPv4 and IPv6. Explain IPv6 header format and advantages.', m:'10M', p:'qhi'},
+  ]},
+  {unit:'Unit IV — Wireless & Optical Networks', qs:[
+    {n:'Q4a', txt:'Explain IEEE 802.11 wireless LAN. Describe CSMA/CA protocol and the hidden terminal problem.', m:'10M', p:'qhi'},
+    {n:'Q4b', txt:'Explain Mobile IP. Describe the role of Home Agent, Foreign Agent, and the registration process.', m:'10M', p:'qhi'},
+    {n:'OR Q4c', txt:'Explain WDM (Wavelength Division Multiplexing) and optical network architecture.', m:'10M', p:'qmed'},
+  ]},
+  {unit:'Unit V — Advanced Networking', qs:[
+    {n:'Q5a', txt:'Explain MANET. Describe AODV routing protocol with route discovery and maintenance.', m:'10M', p:'qhi'},
+    {n:'Q5b', txt:'Explain VPN architecture. Describe IPSec modes and types of VPN.', m:'10M', p:'qhi'},
+    {n:'OR Q5c', txt:'Explain MPLS. Describe label switching, FEC, and LSP with a packet flow example.', m:'10M', p:'qhi'},
+    {n:'OR Q5d', txt:'Explain Wireless Sensor Networks. Describe the LEACH clustering protocol and energy model.', m:'10M', p:'qmed'},
+  ]},
+];
+
+/* ═══════════════ BUILD FUNCTIONS ═══════════════ */
+
+function buildHM(){
+  const g = document.getElementById('hgrid');
+  units.forEach((u, ui)=>{
+    const card = document.createElement('div'); card.className='ucard';
+    const hdr = document.createElement('div'); hdr.className='uhdr';
+    const aid = 'arr'+ui;
+    hdr.innerHTML=`<span class="ulbl" style="background:${u.c};color:${u.tc}">${u.l}</span><span style="font-size:12px;color:var(--muted);flex:1">${u.pri}</span><span id="${aid}" style="font-size:13px;color:var(--dim);transition:transform .2s;display:inline-block">▾</span>`;
+    const body = document.createElement('div'); body.className='ubody';
+    u.topics.forEach(t=>{
+      const st = '★'.repeat(Math.min(t.s,5)) + '☆'.repeat(Math.max(0,5-t.s));
+      const bc = t.b==='must'?'bmust': t.b==='skip'?'bskip':'bgood';
+      const lbl = t.b==='must'?'must-do': t.b==='skip'?'skip if short':'good to know';
+      body.innerHTML += `<div class="trow"><span class="tstars">${st}</span><span class="tname">${t.n}</span><div class="fbar"><div class="ffill" style="width:${t.f*10}%"></div></div><span class="badge ${bc}">${lbl}</span></div>`;
+    });
+    hdr.onclick=()=>{
+      const open = body.classList.toggle('open');
+      const a = document.getElementById(aid);
+      a.style.transform = open?'rotate(180deg)':'rotate(0deg)';
+    };
+    card.appendChild(hdr); card.appendChild(body); g.appendChild(card);
+  });
+}
+
+function buildEV(){
+  const tb = document.getElementById('evt');
+  evd.forEach(d=>{
+    const ev = (d.p/100*d.m).toFixed(1);
+    const evh = (parseFloat(ev)/d.h).toFixed(1);
+    const cl = parseFloat(evh)>=10?'evH': parseFloat(evh)>=5?'evM':'evL';
+    tb.innerHTML += `<tr>
+      <td style="font-weight:600">${d.t}</td>
+      <td style="color:var(--muted)">Unit ${d.u}</td>
+      <td>${d.p}%</td><td>${d.m}M</td>
+      <td class="${cl}">${ev}</td>
+      <td style="color:var(--dim)">${d.h}h</td>
+      <td class="${cl}" style="font-size:15px;font-weight:700">${evh}</td>
+    </tr>`;
+  });
+}
+
+function buildAns(){
+  const list = document.getElementById('alist');
+  answers.forEach((a, idx)=>{
+    const card = document.createElement('div'); card.className='acard';
+    const state={open:false};
+    const arrId = 'aarr'+idx;
+    const aq = document.createElement('div'); aq.className='aq';
+    aq.innerHTML=`<span class="aq-left">${a.q}</span><span class="aq-right"><span class="badge bmust" style="font-size:11px">Unit ${a.u}</span><span class="arr" id="${arrId}">▾</span></span>`;
+    const ab = document.createElement('div'); ab.className='ab';
+    ab.innerHTML = a.body;
+    aq.onclick=()=>{
+      state.open=!state.open;
+      ab.classList.toggle('open');
+      const arr=document.getElementById(arrId);
+      if(arr) arr.classList.toggle('open');
+    };
+    card.appendChild(aq); card.appendChild(ab); list.appendChild(card);
+  });
+}
+
+function buildPlan(){
+  const g = document.getElementById('pgrid');
+  plans.forEach(p=>{
+    const c = document.createElement('div'); c.className='pc';
+    c.innerHTML=`<h3>${p.t}</h3>${p.s.map(s=>`<div class="pslot"><span class="ptime">${s.h}</span><span class="pcnt">${s.c}</span></div>`).join('')}`;
+    g.appendChild(c);
+  });
+}
+
+function buildTracker(){
+  const list = document.getElementById('tklist');
+  let globalIdx=0;
+  ckSections.forEach(sec=>{
+    const secDiv = document.createElement('div'); secDiv.className='tksec';
+    secDiv.innerHTML=`<div class="tksec-head">${sec.head}</div>`;
+    sec.items.forEach(item=>{
+      const i=globalIdx++;
+      let stored=false;
+      try{stored=localStorage.getItem('jntuh_acn2_'+i)==='1';}catch(e){}
+      const div=document.createElement('div'); div.className='cki';
+      div.innerHTML=`<input type="checkbox" id="ck${i}" ${stored?'checked':''}><label for="ck${i}">${item}</label>`;
+      div.querySelector('input').addEventListener('change',e=>{
+        try{localStorage.setItem('jntuh_acn2_'+i,e.target.checked?'1':'0');}catch(er){}
+        upProg();
+      });
+      secDiv.appendChild(div);
+    });
+    list.appendChild(secDiv);
+  });
+  upProg();
+}
+
+function upProg(){
+  const total = document.querySelectorAll('#tklist input').length;
+  const done = document.querySelectorAll('#tklist input:checked').length;
+  const pct = total>0?Math.round(done/total*100):0;
+  document.getElementById('pp').textContent=`${done} / ${total} (${pct}%)`;
+  document.getElementById('pb').style.width=pct+'%';
+}
+
+function resetTracker(){
+  if(!confirm('Reset all checkboxes?')) return;
+  document.querySelectorAll('#tklist input').forEach((el,i)=>{
+    el.checked=false;
+    try{localStorage.removeItem('jntuh_acn2_'+i);}catch(e){}
+  });
+  upProg();
+}
+
+function buildCompare(){
+  const g = document.getElementById('cmpcontent');
+  compares.forEach(cmp=>{
+    const wrap=document.createElement('div'); wrap.className='cmp-card';
+    wrap.innerHTML=`<div class="cmp-head">⚖ ${cmp.title}</div>`;
+    const tbl=document.createElement('table'); tbl.className='cmp-tbl';
+    cmp.rows.forEach((row,ri)=>{
+      const tr=document.createElement('tr');
+      row.forEach((cell,ci)=>{
+        const el=ri===0?document.createElement('th'):document.createElement('td');
+        el.textContent=cell;
+        tr.appendChild(el);
+      });
+      tbl.appendChild(tr);
+    });
+    wrap.appendChild(tbl); g.appendChild(wrap);
+  });
+}
+
+function buildPredicted(){
+  const g = document.getElementById('qpaper');
+  const wrap = document.createElement('div'); wrap.className='qpaper';
+  const head = document.createElement('div'); head.className='qpaper-head';
+  head.innerHTML='<span>🎯 Predicted Question Paper 2025–26</span><span style="font-size:11px;color:var(--muted)">5 Units × 2 Qs · Answer any 1 per unit · 50M + Short Qs</span>';
+  wrap.appendChild(head);
+  predictedPaper.forEach(unit=>{
+    const ud=document.createElement('div'); ud.className='qunit';
+    ud.innerHTML=`<div class="qunit-label">${unit.unit}</div>`;
+    unit.qs.forEach(q=>{
+      const qi=document.createElement('div'); qi.className='qitem';
+      qi.innerHTML=`<span class="qnum">${q.n})</span><span class="qtxt">${q.txt}</span><span class="qmarks">${q.m}</span><span class="qprob ${q.p}">${q.p==='qhi'?'Very High':'High'}</span>`;
+      ud.appendChild(qi);
+    });
+    wrap.appendChild(ud);
+  });
+  g.appendChild(wrap);
+}
+
+function sw(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`[onclick="sw('${id}')"]`).classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+
+
+/* ═══════════════ 4-HR FASTTRACK ═══════════════ */
+const ftBlocks = [
+  {
+    slot:'H1 (0:00–1:00)', color:'#dc2626', label:'UNIT III — TCP CORE',
+    tag:'60 min · ~30 marks expected',
+    topics:[
+      {
+        t:'TCP Congestion Control',
+        marks:'10M · 95% prob',
+        bullets:[
+          'cwnd starts at 1 MSS → doubles every RTT = <b>Slow Start</b>',
+          'When cwnd ≥ ssthresh → +1 MSS/RTT = <b>Congestion Avoidance</b>',
+          '3 dup ACKs → retransmit immediately = <b>Fast Retransmit</b>',
+          'After fast retransmit: ssthresh=cwnd/2, cwnd=ssthresh+3 = <b>Fast Recovery</b>',
+          'Timeout: ssthresh=cwnd/2, cwnd=1, back to Slow Start',
+          '<b>AIMD</b> = Additive Increase (+1/RTT) / Multiplicative Decrease (÷2)',
+          '<b>Diagram:</b> Sawtooth — Y=cwnd, X=RTT. Exponential → linear → halve → repeat',
+        ],
+        memory:'Slow Start → CA → Fast Retransmit → Fast Recovery. Timeout resets to 1.',
+      },
+      {
+        t:'TCP Three-way Handshake',
+        marks:'10M · 90% prob',
+        bullets:[
+          '<b>SYN:</b> Client→Server [SYN=1, Seq=x] → Client: SYN_SENT',
+          '<b>SYN-ACK:</b> Server→Client [SYN=1,ACK=1, Seq=y, Ack=x+1] → Server: SYN_RCVD',
+          '<b>ACK:</b> Client→Server [ACK=1, Seq=x+1, Ack=y+1] → Both: ESTABLISHED',
+          '<b>4-way FIN:</b> FIN → ACK → FIN → ACK. Client waits TIME_WAIT (2×MSL).',
+          'Why 3 steps not 2? → Must confirm BOTH sides received each other\'s ISN',
+        ],
+        memory:'SYN(x) → SYN-ACK(y,x+1) → ACK(y+1). Draw two vertical timelines.',
+      },
+      {
+        t:'TCP vs UDP',
+        marks:'5–10M · 85% prob',
+        bullets:[
+          'TCP: connection-oriented, reliable, ordered, flow+congestion control, 20B header',
+          'UDP: connectionless, best-effort, no ordering, no control, 8B header (fixed)',
+          'TCP uses: HTTP, FTP, SMTP, SSH &nbsp;|&nbsp; UDP uses: DNS, VoIP, streaming, gaming',
+          '<b>UDP header:</b> Src Port | Dst Port | Length | Checksum — just 4 fields',
+          '<b>TCP header key fields:</b> Seq, Ack, Flags (SYN/ACK/FIN/RST), Window Size',
+        ],
+        memory:'TCP = reliable slow. UDP = fast lossy. Header sizes: 20B vs 8B.',
+      },
+    ],
+    selftest:[
+      'Draw the sawtooth cwnd diagram from memory',
+      'Write all 3 handshake steps with seq numbers without looking',
+      'Fill TCP header fields — Seq, Ack, Flags, Window — from memory',
+    ],
+  },
+  {
+    slot:'H2 (1:00–2:00)', color:'#d97706', label:'UNIT III cont. + UNIT I',
+    tag:'60 min · ~20 marks expected',
+    topics:[
+      {
+        t:'DNS Architecture',
+        marks:'10M · 82% prob',
+        bullets:[
+          '<b>4 levels:</b> Root (13 servers) → TLD (.com/.in) → Authoritative → Local Resolver',
+          '<b>Recursive:</b> Local DNS does all work, returns final IP to client',
+          '<b>Iterative:</b> Each server returns a referral, client queries next level',
+          '<b>Records:</b> A (IPv4), AAAA (IPv6), MX (mail), CNAME (alias), NS (name server)',
+          'TTL controls caching duration at local resolver',
+          '<b>Diagram:</b> Client → Local → Root → TLD → Authoritative → IP returned',
+        ],
+        memory:'Root knows TLD. TLD knows Authoritative. Authoritative knows the IP.',
+      },
+      {
+        t:'IPv4 vs IPv6',
+        marks:'10M · 85% prob',
+        bullets:[
+          'IPv4: 32-bit, dotted decimal, 20–60B header, has checksum, fragmentation by routers',
+          'IPv6: 128-bit, hex colon, 40B FIXED header, no checksum, fragmentation by host only',
+          'IPv6 adds: Flow Label (QoS), mandatory IPSec, SLAAC (no DHCP needed)',
+          'IPv6 removes: Broadcast (use multicast), NAT, header checksum',
+          '<b>Transition:</b> Dual-stack (both), Tunneling (IPv6 in IPv4), NAT64',
+          '<b>IPv6 address classes:</b> Unicast, Multicast, Anycast (no Broadcast)',
+        ],
+        memory:'IPv6 = bigger addresses + fixed header + no NAT + no broadcast.',
+      },
+      {
+        t:'OSI Model',
+        marks:'10M · 90% prob',
+        bullets:[
+          '<b>7→1:</b> Application(HTTP/FTP) → Presentation(SSL/JPEG) → Session(NetBIOS) →',
+          'Transport(TCP/UDP) → Network(IP/OSPF) → Data Link(Ethernet/802.11) → Physical(cables)',
+          '<b>PDUs:</b> Data | Data | Data | Segment | Packet | Frame | Bits',
+          '<b>Encapsulation:</b> Data→+TCP header=Segment→+IP=Packet→+MAC+CRC=Frame→Bits',
+          '<b>TCP/IP maps:</b> App+Pres+Ses=Application; Transport; Network=Internet; DL+Phys=NetAccess',
+        ],
+        memory:'All People Seem To Need Data Processing (7→1). PDU per layer.',
+      },
+    ],
+    selftest:[
+      'Draw DNS hierarchy 4 levels without notes',
+      'Write 5 differences IPv4 vs IPv6 as a table row',
+      'Name all 7 OSI layers bottom-up and their PDUs',
+    ],
+  },
+  {
+    slot:'H3 (2:00–3:00)', color:'#059669', label:'UNIT II — ROUTING + LINK',
+    tag:'60 min · ~20 marks expected',
+    topics:[
+      {
+        t:"Dijkstra's Algorithm",
+        marks:'10M · 90% prob',
+        bullets:[
+          'Init: D(src)=0, D(others)=∞, N\'={}',
+          'Loop: pick u∉N\' with min D(u) → add to N\' → update neighbors: D(u)+c(u,v)<D(v)?',
+          '<b>Worked example (A-B=2, A-C=5, B-C=2, B-D=6, C-D=1, C-E=4, D-E=3):</b>',
+          'Step0: N\'={A}, D(B)=2,D(C)=5,D(D)=∞,D(E)=∞',
+          'Step1: pick B(2) → D(C)=min(5,2+2)=4, D(D)=8',
+          'Step2: pick C(4) → D(D)=min(8,4+1)=5, D(E)=8',
+          'Step3: pick D(5) → D(E)=min(8,5+3)=8. Done.',
+          'Result: A→B=2, A→B→C=4, A→B→C→D=5, A→B→C→E=8',
+          '<b>Used in OSPF.</b> O(n²) basic, O((n+e)logn) with heap.',
+        ],
+        memory:'Pick smallest unvisited, update neighbors, repeat. Build iteration table.',
+      },
+      {
+        t:'Distance Vector + Count-to-Infinity',
+        marks:'10M · 80% prob',
+        bullets:[
+          '<b>Bellman-Ford:</b> D(x,y) = min over v { c(x,v) + D(v,y) }',
+          'Each router shares full DV only with direct neighbors, periodically',
+          '<b>Count-to-infinity:</b> A-B link fails, B hears from C "A=3" → B sets A=4, C sets A=6... loops to ∞',
+          '<b>Fix 1 — Split Horizon:</b> Don\'t advertise route back to who you learned it from',
+          '<b>Fix 2 — Poisoned Reverse:</b> Advertise learned routes as ∞ back to source',
+          '<b>Fix 3 — Hold-down timer:</b> Freeze updates briefly after failure',
+          'RIP uses DV, max 15 hops. OSPF uses Link State (Dijkstra).',
+        ],
+        memory:'DV = share with neighbors. LS = flood topology, run Dijkstra locally.',
+      },
+      {
+        t:'Ethernet CSMA/CD + CRC',
+        marks:'10M · 85% prob',
+        bullets:[
+          '<b>CSMA/CD steps:</b> Sense → transmit if idle → detect collision → jam 48b → backoff → retry',
+          '<b>Binary exponential backoff:</b> After nth collision, wait rand[0, 2ⁿ-1] slots',
+          '<b>Frame:</b> Preamble(7B) | SFD(1B) | DstMAC(6B) | SrcMAC(6B) | Type(2B) | Data(46–1500B) | FCS(4B)',
+          'MAC: 48-bit. First 3B=OUI (manufacturer), Last 3B=serial. Broadcast=FF:FF:FF:FF:FF:FF',
+          '<b>CRC:</b> sender appends remainder of (data÷generator). Receiver divides — if remainder≠0, error.',
+          'CRC-32 used in Ethernet FCS field. Detects all burst errors ≤32 bits.',
+        ],
+        memory:'Sense-Transmit-Detect-Jam-Backoff. Frame: Pre|SFD|DstMAC|SrcMAC|Type|Data|FCS.',
+      },
+    ],
+    selftest:[
+      'Solve Dijkstra on the 5-node example from memory, build full table',
+      'Explain count-to-infinity scenario in 3 sentences',
+      'Write Ethernet frame format fields with sizes',
+    ],
+  },
+  {
+    slot:'H4 (3:00–4:00)', color:'#7c3aed', label:'UNIT IV + V — HIGH SCORING THEORY',
+    tag:'60 min · ~20 marks expected',
+    topics:[
+      {
+        t:'MANET + AODV',
+        marks:'10M · 88% prob',
+        bullets:[
+          '<b>MANET:</b> No infrastructure, nodes are both hosts and routers, dynamic topology',
+          '<b>Proactive:</b> Always maintain routes (DSDV, OLSR) — high overhead',
+          '<b>Reactive:</b> Find routes on demand (AODV, DSR) — low overhead',
+          '<b>AODV route discovery:</b> Src broadcasts RREQ (with seq no.) → nodes forward or reply',
+          'Dest sends RREP back unicast along reverse path → src gets route → sends data',
+          '<b>AODV maintenance:</b> Link breaks → RERR sent upstream → src rediscovers',
+          'Seq numbers prevent loops and stale routes',
+          '<b>Apps:</b> Military, disaster recovery, VANET, sensor networks',
+        ],
+        memory:'RREQ floods out, RREP comes back, RERR breaks route. Seq numbers = no loops.',
+      },
+      {
+        t:'VPN + MPLS',
+        marks:'10M each · 88%/78% prob',
+        bullets:[
+          '<b>VPN:</b> Encrypted tunnel over public internet. Makes remote network appear local.',
+          '<b>IPSec modes:</b> Transport (host-host, payload encrypted) | Tunnel (GW-GW, full packet encrypted)',
+          '<b>IPSec protocols:</b> AH = auth only | ESP = auth + encryption',
+          '<b>VPN types:</b> Site-to-site (offices) | Remote access (home user) | Extranet (partners)',
+          '<b>MPLS:</b> Routes by short labels not long IP prefix. Operates at Layer 2.5.',
+          '<b>MPLS label (32b):</b> Label(20) | TC(3) | S/Bottom(1) | TTL(8)',
+          '<b>Operations:</b> PUSH (ingress LER adds label) | SWAP (LSR changes label) | POP (egress removes)',
+          '<b>FEC</b> = group of packets with same forwarding. <b>LSP</b> = pre-built label-switched path.',
+          '<b>MPLS advantages:</b> Fast forwarding, traffic engineering, QoS, VPN support',
+        ],
+        memory:'VPN=tunnel+encrypt. MPLS=label swap. PUSH→SWAP→SWAP→POP.',
+      },
+      {
+        t:'Mobile IP + IEEE 802.11',
+        marks:'10M each · 80%/78% prob',
+        bullets:[
+          '<b>Mobile IP:</b> MN keeps Home Address while roaming to foreign networks',
+          '<b>HA</b> (Home Agent) intercepts packets, tunnels to CoA | <b>FA</b> (Foreign Agent) receives tunnel, delivers to MN',
+          '<b>Registration:</b> MN→FA(RegReq)→HA(auth)→FA(RegReply)→MN',
+          '<b>Triangle routing:</b> CN→HA→tunnel→FA→MN. Return: MN→CN directly.',
+          '<b>IEEE 802.11 CSMA/CA:</b> Sense idle for DIFS → backoff → transmit → wait ACK',
+          '<b>Hidden terminal:</b> A and C can\'t hear each other, both send to B → collision',
+          '<b>RTS/CTS fix:</b> A sends RTS → AP sends CTS heard by all → C defers',
+          '<b>802.11 frame has 4 MAC addresses</b> (vs Ethernet\'s 2): src, dst, BSSID, optional 4th',
+        ],
+        memory:'Mobile IP: HA intercepts, tunnels to CoA. 802.11: CSMA/CA not CD, RTS/CTS fixes hidden terminal.',
+      },
+    ],
+    selftest:[
+      'Write AODV discovery flow: 3 steps (RREQ→RREP→data), what RERR does',
+      'Draw VPN tunnel: Client → internet → Gateway → LAN. Label IPSec Tunnel mode.',
+      'Explain Mobile IP registration in 4 steps from memory',
+    ],
+  },
+];
+
+function buildFT() {
+  const panel = document.getElementById('ft');
+  panel.innerHTML = '';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'background:#dc2626;color:#fff;border-radius:10px;padding:14px 18px;margin-bottom:14px';
+  hdr.innerHTML = `
+    <div style="font-size:16px;font-weight:700;margin-bottom:4px">⚡ 4-Hour Fasttrack — Maximum marks in minimum time</div>
+    <div style="font-size:12px;opacity:.85">1 hour per block · Read bullets → cover → recall → move on. Do NOT re-read. Check tracker after each block.</div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">H1: TCP Core → ~30M</span>
+      <span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">H2: DNS+IPv6+OSI → ~20M</span>
+      <span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">H3: Routing+Ethernet → ~20M</span>
+      <span style="background:rgba(255,255,255,.2);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">H4: MANET+VPN+Mobile → ~20M</span>
+    </div>`;
+  panel.appendChild(hdr);
+
+  // Timer
+  const timerDiv = document.createElement('div');
+  timerDiv.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:16px';
+  timerDiv.innerHTML = `
+    <div style="font-size:28px;font-weight:700;color:#dc2626;font-variant-numeric:tabular-nums" id="ft-timer">4:00:00</div>
+    <div style="flex:1">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600">TIME REMAINING</div>
+      <div style="background:var(--border);border-radius:4px;height:6px"><div id="ft-tbar" style="height:100%;border-radius:4px;background:#dc2626;width:100%;transition:width 1s"></div></div>
+    </div>
+    <button onclick="toggleTimer()" id="ft-tbtn" style="padding:6px 14px;font-size:12px;font-weight:700;background:#dc2626;color:#fff;border:none;border-radius:6px;cursor:pointer">▶ START</button>`;
+  panel.appendChild(timerDiv);
+
+  // Progress tracker
+  const progDiv = document.createElement('div');
+  progDiv.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:14px';
+  progDiv.innerHTML = `
+    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+      <span style="font-weight:700;color:var(--text)">Topics covered</span>
+      <span id="ft-prog-val" style="font-weight:700;color:#dc2626">0 / 10</span>
+    </div>
+    <div style="background:var(--border);border-radius:4px;height:8px"><div id="ft-prog-bar" style="height:100%;border-radius:4px;background:#dc2626;width:0%;transition:width .3s"></div></div>`;
+  panel.appendChild(progDiv);
+
+  // Build each hour block
+  ftBlocks.forEach((block, bi) => {
+    const blockDiv = document.createElement('div');
+    blockDiv.style.cssText = 'margin-bottom:16px';
+
+    // Block header
+    const blockHdr = document.createElement('div');
+    blockHdr.style.cssText = `background:${block.color};color:#fff;border-radius:10px 10px 0 0;padding:10px 16px;display:flex;justify-content:space-between;align-items:center`;
+    blockHdr.innerHTML = `<div><div style="font-size:14px;font-weight:700">${block.slot} — ${block.label}</div><div style="font-size:11px;opacity:.8;margin-top:2px">${block.tag}</div></div>`;
+    blockDiv.appendChild(blockHdr);
+
+    const blockBody = document.createElement('div');
+    blockBody.style.cssText = 'border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;overflow:hidden';
+
+    // Topics
+    block.topics.forEach((topic, ti) => {
+      const ckId = `ft_${bi}_${ti}`;
+      let checked = false;
+      try { checked = localStorage.getItem(ckId) === '1'; } catch(e) {}
+
+      const topicDiv = document.createElement('div');
+      topicDiv.style.cssText = `background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;${checked ? 'opacity:0.5' : ''}`;
+      topicDiv.id = `td_${ckId}`;
+
+      const topicHdr = document.createElement('div');
+      topicHdr.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:8px';
+      topicHdr.innerHTML = `
+        <input type="checkbox" id="${ckId}" ${checked ? 'checked' : ''} style="accent-color:${block.color};width:16px;height:16px;cursor:pointer;flex-shrink:0">
+        <label for="${ckId}" style="font-size:14px;font-weight:700;color:var(--text);cursor:pointer;flex:1">${topic.t}</label>
+        <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-bg);color:var(--green);font-weight:600;white-space:nowrap">${topic.marks}</span>`;
+
+      topicDiv.appendChild(topicHdr);
+
+      // Bullets
+      const ul = document.createElement('ul');
+      ul.style.cssText = 'list-style:none;padding:0;margin:0 0 8px 26px';
+      topic.bullets.forEach(b => {
+        const li = document.createElement('li');
+        li.style.cssText = 'font-size:13px;color:var(--muted);padding:3px 0;border-bottom:1px solid var(--surface2);line-height:1.5';
+        li.innerHTML = '• ' + b;
+        ul.appendChild(li);
+      });
+      topicDiv.appendChild(ul);
+
+      // Memory hook
+      const mem = document.createElement('div');
+      mem.style.cssText = `background:${block.color}18;border-left:3px solid ${block.color};padding:6px 10px;border-radius:0 6px 6px 0;font-size:12px;font-weight:600;color:var(--text)`;
+      mem.innerHTML = '🧠 ' + topic.memory;
+      topicDiv.appendChild(mem);
+
+      // Checkbox change
+      topicDiv.querySelector('input').addEventListener('change', e => {
+        try { localStorage.setItem(ckId, e.target.checked ? '1' : '0'); } catch(err) {}
+        topicDiv.style.opacity = e.target.checked ? '0.5' : '1';
+        updateFTProgress();
+      });
+
+      blockBody.appendChild(topicDiv);
+    });
+
+    // Self-test box
+    const stDiv = document.createElement('div');
+    stDiv.style.cssText = 'background:var(--surface2);padding:10px 16px';
+    stDiv.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">✍ Self-test before moving on</div>
+      ${block.selftest.map(s => `<div style="font-size:12px;color:var(--text);padding:3px 0">▸ ${s}</div>`).join('')}`;
+    blockBody.appendChild(stDiv);
+
+    blockDiv.appendChild(blockBody);
+    panel.appendChild(blockDiv);
+  });
+
+  updateFTProgress();
+}
+
+function updateFTProgress() {
+  const total = ftBlocks.reduce((s,b) => s + b.topics.length, 0);
+  const done = document.querySelectorAll('#ft input[type=checkbox]:checked').length;
+  const pct = Math.round(done / total * 100);
+  const v = document.getElementById('ft-prog-val');
+  const b = document.getElementById('ft-prog-bar');
+  if(v) v.textContent = `${done} / ${total} (${pct}%)`;
+  if(b) b.style.width = pct + '%';
+}
+
+// Countdown timer
+let ftTimerInterval = null;
+let ftSecsLeft = 4 * 3600;
+let ftRunning = false;
+
+function toggleTimer() {
+  if (ftRunning) {
+    clearInterval(ftTimerInterval);
+    ftRunning = false;
+    document.getElementById('ft-tbtn').textContent = '▶ RESUME';
+  } else {
+    ftRunning = true;
+    document.getElementById('ft-tbtn').textContent = '⏸ PAUSE';
+    ftTimerInterval = setInterval(() => {
+      if (ftSecsLeft <= 0) {
+        clearInterval(ftTimerInterval);
+        document.getElementById('ft-timer').textContent = '⏰ TIME UP';
+        document.getElementById('ft-tbtn').textContent = 'DONE';
+        return;
+      }
+      ftSecsLeft--;
+      const h = Math.floor(ftSecsLeft / 3600);
+      const m = Math.floor((ftSecsLeft % 3600) / 60);
+      const s = ftSecsLeft % 60;
+      const el = document.getElementById('ft-timer');
+      const bar = document.getElementById('ft-tbar');
+      if(el) el.textContent = `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      if(bar) bar.style.width = (ftSecsLeft / (4*3600) * 100) + '%';
+    }, 1000);
+  }
+}
+
+
+/* ── init ── */
+buildHM();
+buildEV();
+buildAns();
+buildPlan();
+buildTracker();
+buildCompare();
+buildPredicted();
+buildFT();
+</script>
+</body>
+</html>
